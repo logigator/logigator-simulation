@@ -1,0 +1,32 @@
+{
+  "name": "logigator-simulation",
+  "version": "0.1.0",
+  "description": "Multi-Threaded C++ Node.JS Module for Simulating Logic Circuits.",
+  "main": "index.js",
+  "homepage": "https://github.com/logigator/logigator-simulation#readme",
+  "bugs": {
+    "url": "https://github.com/logigator/logigator-simulation/issues"
+  },
+  "scripts": {
+    "build": "node-gyp build",
+    "install": "node-gyp rebuild",
+    "test": "node ./test.js"
+  },
+  "files": [
+    "src",
+    "binding.gyp"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/logigator/logigator-simulation.git"
+  },
+  "author": "Andreas Schloessl",
+  "license": "MIT",
+  "gypfile": true,
+  "devDependencies": {
+    "node-gyp": "^3.8.0"
+  },
+  "dependencies": {
+    "nan": "^2.12.1"
+  }
+}
