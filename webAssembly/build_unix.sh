@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./webAssembly/emscripten/emsdk activate latest
+bash webAssembly/emscripten/emsdk activate latest
 source ./webAssembly/emscripten/emsdk_env.sh || exit 1
 
 em++ -O0 --bind -s WASM=1 \
