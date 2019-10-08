@@ -43,11 +43,11 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 
 	Board* board = new Board();
 
-	if (obj->Get(Nan::New("threads").ToLocalChecked())->IsNumber())
-		threadCount = obj->Get(Nan::New("threads").ToLocalChecked())->Int32Value(Nan::GetCurrentContext()).FromJust();
+	if (Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->IsNumber())
+		threadCount = Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
 
-	if (obj->Get(Nan::New("links").ToLocalChecked())->IsNumber()) {
-		linkCount = obj->Get(Nan::New("links").ToLocalChecked())->Int32Value(Nan::GetCurrentContext()).FromJust();
+	if (Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->IsNumber()) {
+		linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
 		links = new Link*[linkCount] { 0 };
 		for (unsigned int i = 0; i < linkCount; i++) {
 			links[i] = new Link(board);
@@ -57,31 +57,31 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		links = new Link*[0];
 	}
 
-	if (obj->Get(Nan::New("components").ToLocalChecked())->IsArray()) {
-		v8::Local<v8::Array> v8Components = v8::Local<v8::Array>::Cast(obj->Get(Nan::New("components").ToLocalChecked()));
+	if (Nan::Get(obj, Nan::New("components").ToLocalChecked()).ToLocalChecked()->IsArray()) {
+		v8::Local<v8::Array> v8Components = v8::Local<v8::Array>::Cast(Nan::Get(obj, Nan::New("components").ToLocalChecked()).ToLocalChecked());
 
 		componentCount = v8Components->Length();
 		components = new Component*[componentCount] { 0 };
 		for (unsigned int i = 0; i < componentCount; i++) {
-			v8::Local<v8::Object> v8Component = v8Components->Get(i)->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
+			v8::Local<v8::Object> v8Component = Nan::Get(v8Components, i).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-			const char* componentType = *Nan::Utf8String(v8Component->Get(Nan::New("type").ToLocalChecked()));
-			v8::Local<v8::Array> v8ComponentInputs = v8::Local<v8::Array>::Cast(v8Component->Get(Nan::New("inputs").ToLocalChecked()));
+			const char* componentType = *Nan::Utf8String(Nan::Get(v8Component, Nan::New("type").ToLocalChecked()).ToLocalChecked());
+			v8::Local<v8::Array> v8ComponentInputs = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("inputs").ToLocalChecked()).ToLocalChecked());
 			Link** componentInputs = new Link*[v8ComponentInputs->Length()];
 			for (unsigned int j = 0; j < v8ComponentInputs->Length(); j++)
-				componentInputs[j] = links[v8ComponentInputs->Get(j)->Int32Value(Nan::GetCurrentContext()).FromJust()];
+				componentInputs[j] = links[Nan::Get(v8ComponentInputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
 
-			v8::Local<v8::Array> v8ComponentOutputs = v8::Local<v8::Array>::Cast(v8Component->Get(Nan::New("outputs").ToLocalChecked()));
+			v8::Local<v8::Array> v8ComponentOutputs = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("outputs").ToLocalChecked()).ToLocalChecked());
 			Link** componentOutputs = new Link*[v8ComponentOutputs->Length()];
 			for (unsigned int j = 0; j < v8ComponentOutputs->Length(); j++)
-				componentOutputs[j] = links[v8ComponentOutputs->Get(j)->Int32Value(Nan::GetCurrentContext()).FromJust()];
+				componentOutputs[j] = links[Nan::Get(v8ComponentOutputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
 			
 			if (!strcmp(componentType, "AND"))
 				components[i] = new AND(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "BUTTON"))
 				components[i] = new BUTTON(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "CLK"))
-				components[i] = new CLK(board, componentInputs, componentOutputs, v8Component->Get(Nan::New("CLK_Speed").ToLocalChecked())->Int32Value(Nan::GetCurrentContext()).FromJust());
+				components[i] = new CLK(board, componentInputs, componentOutputs, Nan::Get(v8Component, Nan::New("CLK_Speed").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust());
 			else if (!strcmp(componentType, "DELAY"))
 				components[i] = new DELAY(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "NOT"))
@@ -175,12 +175,12 @@ void getStatus(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	Board* board = boards[identifier];
 	v8::Local<v8::Object> obj = Nan::New<v8::Object>();
 	
-	obj->Set(Nan::New("currentSpeed").ToLocalChecked(), Nan::New((double)board->currentSpeed));
-	obj->Set(Nan::New("currentState").ToLocalChecked(), Nan::New(board->getCurrentState()));
-	obj->Set(Nan::New("threadCount").ToLocalChecked(), Nan::New(board->getThreadCount()));
-	obj->Set(Nan::New("componentCount").ToLocalChecked(), Nan::New((unsigned int)board->componentCount));
-	obj->Set(Nan::New("linkCount").ToLocalChecked(), Nan::New((unsigned int)board->linkCount));
-	obj->Set(Nan::New("tick").ToLocalChecked(), Nan::New((double)board->getCurrentTick()));
+	Nan::Set(obj, Nan::New("currentSpeed").ToLocalChecked(), Nan::New((double)board->currentSpeed));
+	Nan::Set(obj, Nan::New("currentState").ToLocalChecked(), Nan::New(board->getCurrentState()));
+	Nan::Set(obj, Nan::New("threadCount").ToLocalChecked(), Nan::New(board->getThreadCount()));
+	Nan::Set(obj, Nan::New("componentCount").ToLocalChecked(), Nan::New((unsigned int)board->componentCount));
+	Nan::Set(obj, Nan::New("linkCount").ToLocalChecked(), Nan::New((unsigned int)board->linkCount));
+	Nan::Set(obj, Nan::New("tick").ToLocalChecked(), Nan::New((double)board->getCurrentTick()));
 
 	args.GetReturnValue().Set(obj);
 }
@@ -205,19 +205,19 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		v8::Local<v8::Array> v8Component = Nan::New<v8::Array>();
 
 		for (int j = 0; j < component->getOutputCount(); j++)
-			v8Component->Set(j, Nan::New(component->outputs[j]->getPowered()));
+			Nan::Set(v8Component, j, Nan::New(component->outputs[j]->getPowered()));
 
-		v8Components->Set(i, v8Component);
+		Nan::Set(v8Components, i, v8Component);
 	}
 
 	v8::Local<v8::Array> v8Links = Nan::New<v8::Array>();
 	for (unsigned int i = 0; i < board->linkCount; i++) {
-		v8Links->Set(i, Nan::New(board->getLinks()[i]->powered));
+		Nan::Set(v8Links, i, Nan::New(board->getLinks()[i]->powered));
 	}
 
 	v8::Local<v8::Object> v8Board = Nan::New<v8::Object>();
-	v8Board->Set(Nan::New("components").ToLocalChecked(), v8Components);
-	v8Board->Set(Nan::New("links").ToLocalChecked(), v8Links);
+	Nan::Set(v8Board, Nan::New("components").ToLocalChecked(), v8Components);
+	Nan::Set(v8Board, Nan::New("links").ToLocalChecked(), v8Links);
 	args.GetReturnValue().Set(v8Board);
 }
 
@@ -262,13 +262,13 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 void Initialize(v8::Local<v8::Object> exports) {
-	exports->Set(Nan::New("newBoard").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(newBoard)->GetFunction());
-	exports->Set(Nan::New("removeBoard").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(removeBoard)->GetFunction());
-	exports->Set(Nan::New("startBoard").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(start)->GetFunction());
-	exports->Set(Nan::New("stopBoard").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(stop)->GetFunction());
-	exports->Set(Nan::New("getBoardStatus").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(getStatus)->GetFunction());
-	exports->Set(Nan::New("getBoard").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(getBoard)->GetFunction());
-	exports->Set(Nan::New("triggerInput").ToLocalChecked(), Nan::New<v8::FunctionTemplate>(triggerInput)->GetFunction());
+	Nan::Set(exports, Nan::New("newBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(newBoard)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("removeBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(removeBoard)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("startBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(start)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("stopBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(stop)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("getBoardStatus").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getStatus)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("getBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getBoard)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("triggerInput").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(triggerInput)).ToLocalChecked());
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize)
