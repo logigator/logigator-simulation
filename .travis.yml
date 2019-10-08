@@ -6,7 +6,7 @@ branches:
     - master
     - development
 node_js: 
-  - lts/*
+  - node
 script: 
   - "node test.js tests/*"
 sudo: required
