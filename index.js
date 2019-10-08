@@ -1,2 +1,2 @@
-const logicsim = require('./build/Release/logicsim.node');
+const logicsim = require('./build/Release/logigatorSimulation.node');
 module.exports = {logicsim};
