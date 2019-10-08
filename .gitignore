@@ -22,6 +22,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Bb]uild/
+/webAssembly/emscripten
+/webAssembly/dist/*
+!/webAssembly/dist/.gitkeep
 
 # Visual Studio 2015 cache/options directory
 .vs/

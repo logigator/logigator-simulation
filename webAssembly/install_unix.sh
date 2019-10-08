@@ -1,11 +1,12 @@
 #!/bin/bash
 
-if [ -f 'logigator-simulation.wasm' ]; then
+if [ -f 'webAssembly/dist/logigator-simulation.wasm' ]; then
   exit 0
 fi
 
-git clone https://github.com/emscripten-core/emsdk.git emscripten || exit 1
+if [ -d 'webAssembly/emscripten' ]; then
+  git clone https://github.com/emscripten-core/emsdk.git webAssembly/emscripten || exit 1
+  ./webAssembly/emscripten/emsdk install latest
+fi
 
-./emscripten/emsdk install latest
-
-bash build_unix.sh
+./webAssembly/build_unix.sh
