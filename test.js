@@ -1,7 +1,8 @@
 const fs = require('fs');
 const logicsim = require('./index').logicsim;
 
-var args = process.argv;
+let args = process.argv;
+let failed = false;
 
 for (let fileIndex = 2; fileIndex < args.length; fileIndex++) {
 	process.stdout.write("Running test '" + args[fileIndex] + "'.. ");
@@ -14,7 +15,7 @@ for (let fileIndex = 2; fileIndex < args.length; fileIndex++) {
 	
 	logicsim.startBoard('testBoard_' + fileIndex, config.ticks);
 	
-	while (logicsim.getBoardStatus('testBoard_' + fileIndex).currentState != 1) {}
+	while (logicsim.getBoardStatus('testBoard_' + fileIndex).currentState !== 1) {}
 	let boardState = logicsim.getBoard('testBoard_' + fileIndex);
 	
 	let errorOccurred = false;
@@ -40,4 +41,8 @@ for (let fileIndex = 2; fileIndex < args.length; fileIndex++) {
 	
 	if(!errorOccurred)
 		console.log('\x1b[32m%s\x1b[0m', 'passed!');
+	else
+		failed = true;
 }
+
+process.exit(failed ? 1 : 0);
