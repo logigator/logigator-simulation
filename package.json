@@ -9,11 +9,23 @@
   },
   "scripts": {
     "build": "node-gyp build",
-    "install": "node-gyp rebuild",
+    "build-wasm": "run-script-os",
+    "build-wasm:win32": "webAssembly\\build_win32.bat",
+    "build-wasm:default": "./webAssembly/build_unix.sh",
+    "install": "node-gyp rebuild && run-script-os",
+    "install:win32": "webAssembly\\install_win32.bat",
+    "install:default": "./webAssembly/install_unix.sh",
+    "i:win32": "npm run install:win32",
+    "i:default": "npm run install:default",
+    "isntall:win32": "npm run install:win32",
+    "isntall:default": "npm run install:default",
+    "add:win32": "npm run install:win32",
+    "add:default": "npm run install:default",
     "test": "node ./test.js"
   },
   "files": [
     "src",
+    "webAssembly",
     "binding.gyp"
   ],
   "repository": {
@@ -27,6 +39,7 @@
     "node-gyp": "^6.0.0"
   },
   "dependencies": {
-    "nan": "^2.14.0"
+    "nan": "^2.14.0",
+    "run-script-os": "^1.0.7"
   }
 }

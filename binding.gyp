@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "logicsim",
+      "target_name": "logigator-simulation",
 	  "include_dirs": [
 		"src",
 		"src/components",
