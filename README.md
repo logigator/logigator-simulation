@@ -1,4 +1,4 @@
-# LogicSim
+# Logigator - Simulation Code Base
 Multi-Threaded Simulator for Logic Circuits as Node.JS Native C++ Module.
 ## Getting Started
 ### Prerequisites
