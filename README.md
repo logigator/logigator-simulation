@@ -1,5 +1,6 @@
 # Logigator - Simulation Code Base
 [![Build Status](https://travis-ci.org/logigator/logigator-simulation.svg?branch=master)](https://travis-ci.org/logigator/logigator-simulation)
+[![Build Status](https://travis-ci.org/logigator/logigator-simulation.svg?branch=development)](https://travis-ci.org/logigator/logigator-simulation)
 
 Multi-Threaded Simulator for Logic Circuits as Node.JS Native C++ Module.
 ## Getting Started
