@@ -6,8 +6,6 @@
 em++ -O0 --bind ^
  -std=c++11 ^
  -s WASM=1 ^
- -s MODULARIZE=1 ^
- -s EXPORT_NAME=SimulationModule ^
  -s ALLOW_MEMORY_GROWTH=1 ^
  -o webAssembly/dist/logigator-simulation.js ^
  -Isrc/ ^
