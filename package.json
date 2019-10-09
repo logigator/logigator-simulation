@@ -16,6 +16,7 @@
     "wasm-install:win32": "webAssembly\\install_win32.bat",
     "wasm-install:default": "bash webAssembly/install_unix.sh",
     "prepare": "node-gyp rebuild && npm run wasm-install",
+    "install": "npm run prepare",
     "test": "node ./test.js"
   },
   "files": [
