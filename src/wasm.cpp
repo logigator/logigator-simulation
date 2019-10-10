@@ -93,6 +93,16 @@ int initComponent(unsigned int index, char* type, unsigned int* inputs, unsigned
 	return 0;
 }
 
+int start() {
+    board->start(100);
+    return 0;
+}
+
+int stop() {
+    board->stop();
+    return 0;
+}
+
 EMSCRIPTEN_BINDINGS(module)
 {
 	emscripten::function("test", &test);
@@ -100,4 +110,6 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("initLinks", &initLinks);
 	emscripten::function("initComponents", &initComponents, emscripten::allow_raw_pointers());
 	emscripten::function("initComponent", &initComponent, emscripten::allow_raw_pointers());
+	emscripten::function("start", &start);
+	emscripten::function("stop", &stop);
 }
