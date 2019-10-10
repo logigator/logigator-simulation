@@ -38,11 +38,12 @@ int test() {
 	return 1;
 }
 
-void initBoard() {
+int initBoard() {
 	board->init(components, links, componentCount, linkCount);
+	return 0;
 }
 
-void initLinks(unsigned int count) {
+int initLinks(unsigned int count) {
 	links = new Link*[count] { 0 };
 	
 	for (unsigned int i = 0; i < count; i++) {
@@ -50,14 +51,21 @@ void initLinks(unsigned int count) {
 	}
 
 	linkCount = count;
+
+	return 0;
 }
 
-void initComponents(unsigned int count) {
+int initComponents(unsigned int count) {
 	components = new Component*[count] { 0 };
 	componentCount = count;
+	return 0;
 }
 
-int initComponent(unsigned int index, char* type, unsigned int* inputs, unsigned int* outputs, unsigned int inputCount, unsigned int outputCount) {
+int initComponent(unsigned int index, std::string typeStr, uintptr_t inputsPtr, uintptr_t outputsPtr, unsigned int inputCount, unsigned int outputCount) {
+		const char* type = typeStr.c_str();
+		unsigned int* inputs = reinterpret_cast<unsigned int*>(inputsPtr);
+		unsigned int* outputs = reinterpret_cast<unsigned int*>(outputsPtr);
+
 		Link** componentInputs = new Link*[inputCount];
 
 		for (unsigned int j = 0; j < inputCount; j++) {
@@ -93,14 +101,18 @@ int initComponent(unsigned int index, char* type, unsigned int* inputs, unsigned
 	return 0;
 }
 
-int start() {
-    board->start(100);
+int start(unsigned long ticks) {
+    board->start(ticks);
     return 0;
 }
 
 int stop() {
     board->stop();
     return 0;
+}
+
+unsigned long getCurrentSpeed() {
+	return board->currentSpeed;
 }
 
 EMSCRIPTEN_BINDINGS(module)
@@ -112,4 +124,5 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("initComponent", &initComponent, emscripten::allow_raw_pointers());
 	emscripten::function("start", &start);
 	emscripten::function("stop", &stop);
+	emscripten::function("getCurrentSpeed", &getCurrentSpeed);
 }

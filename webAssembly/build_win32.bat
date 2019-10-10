@@ -11,7 +11,7 @@ em++ -O0 --bind ^
  -std=c++11 ^
  -s WASM=1 ^
  -s ALLOW_MEMORY_GROWTH=1 ^
- -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" ^
+ -s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap', 'lengthBytesUTF8', 'stringToUTF8']" ^
  -o webAssembly/dist/logigator-simulation.js ^
  -Isrc/ ^
  -Isrc/components/ ^
