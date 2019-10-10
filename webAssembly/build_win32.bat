@@ -1,5 +1,9 @@
 @ECHO OFF
 
+IF NOT EXIST webAssembly\emscripten\ (
+    exit /b 1
+)
+
 @CALL webAssembly\emscripten\emsdk activate latest
 @CALL webAssembly\emscripten\emsdk_env.bat --build=Release || exit /b 1
 

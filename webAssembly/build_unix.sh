@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -d 'webAssembly/emscripten' ]; then
+  exit 1
+fi
+
 bash webAssembly/emscripten/emsdk activate latest
 source ./webAssembly/emscripten/emsdk_env.sh || exit 1
 

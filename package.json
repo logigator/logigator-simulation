@@ -8,7 +8,7 @@
     "url": "https://github.com/logigator/logigator-simulation/issues"
   },
   "scripts": {
-    "build": "node-gyp build",
+    "build": "node-gyp build && npm run wasm-build",
     "wasm-build": "run-script-os",
     "wasm-build:win32": "webAssembly\\build_win32.bat",
     "wasm-build:default": "bash webAssembly/build_unix.sh",
