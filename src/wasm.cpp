@@ -1,4 +1,6 @@
 #include <emscripten/bind.h>
+#include <string>
+
 #include "board.h"
 #include "component.h"
 #include "link.h"
@@ -20,22 +22,31 @@ unsigned int componentCount = 0;
 unsigned int linkCount = 0;
 
 int test() {
-	Board* board = new Board();
-	Link** links = new Link*[3]
-	{
-		new Link(board),
-		new Link(board),
-		new Link(board)
-	};
-	Component** components = new Component*[2]
-	{
-		new NOT(board, new Link*[1] { links[0] }, new Link*[1] { links[1] }),
-		new AND(board, new Link*[2] { links[0], links[1] }, new Link*[1] { links[2] })
-	};
-	board->init(components, links, 2, 3, 1);
-	//board->start(100);
+	printf("%s", ("componentCount: " + std::to_string(board->componentCount) + "\n").c_str());
+	printf("%s", ("LinkCount: " + std::to_string(board->linkCount) + "\n").c_str());
+	printf("%s", ("Tick: " + std::to_string(board->getCurrentTick()) + "\n").c_str());
 
-	return 1;
+	std::string linksString = std::string("Links:");
+	for (unsigned int i = 0; i < board->linkCount; i++) {
+		linksString += std::string(" ") + std::to_string(board->getLinks()[i]->powered);
+	}
+	printf("%s", (linksString + std::string("\n")).c_str());
+
+	std::string str = std::string("Components:");
+	for (unsigned int i = 0; i < board->componentCount; i++) {
+		str += std::string("\n [") + std::to_string(i) + std::string("]\n  Inputs: ");
+		for (unsigned int j = 0; j < board->getComponents()[i]->getInputCount(); j++) {
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->inputs[j]->getPowered());
+		}
+
+		str += std::string("\n  Outputs:");
+		for (unsigned int j = 0; j < board->getComponents()[i]->getOutputCount(); j++) {
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->outputs[j]->getPowered());
+		}
+	}
+	printf("%s", (str + std::string("\n")).c_str());
+
+	return 0;
 }
 
 int initBoard() {
@@ -101,8 +112,18 @@ int initComponent(unsigned int index, std::string typeStr, uintptr_t inputsPtr, 
 	return 0;
 }
 
-int start(unsigned long ticks) {
-    board->start(ticks);
+int start() {
+    board->start();
+    return 0;
+}
+
+int startManual(unsigned long ticks) {
+    board->startManual(ticks);
+    return 0;
+}
+
+int startTimeout(unsigned int ms) {
+    board->startTimeout(ms);
     return 0;
 }
 
@@ -115,6 +136,16 @@ unsigned long getCurrentSpeed() {
 	return board->currentSpeed;
 }
 
+uintptr_t getLinks() {
+	bool* links = new bool[linkCount];
+
+	for (unsigned int i = 0; i < linkCount; i++) {
+		links[i] = board->getLinks()[i]->powered;
+	}
+
+	return (uintptr_t)links;
+}
+
 EMSCRIPTEN_BINDINGS(module)
 {
 	emscripten::function("test", &test);
@@ -123,6 +154,9 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("initComponents", &initComponents, emscripten::allow_raw_pointers());
 	emscripten::function("initComponent", &initComponent, emscripten::allow_raw_pointers());
 	emscripten::function("start", &start);
+	emscripten::function("startTimeout", &startTimeout);
+	emscripten::function("startManual", &startManual);
 	emscripten::function("stop", &stop);
 	emscripten::function("getCurrentSpeed", &getCurrentSpeed);
+	emscripten::function("getLinks", &getLinks, emscripten::allow_raw_pointers());
 }

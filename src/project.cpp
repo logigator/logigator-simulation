@@ -140,7 +140,7 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 
 	if (args.Length() > 1)
-		boards[identifier]->start(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust());
+		boards[identifier]->startManual(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust());
 	else
 		boards[identifier]->start();
 }

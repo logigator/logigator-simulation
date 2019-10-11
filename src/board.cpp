@@ -55,6 +55,7 @@ void Board::init(Component** components, Link** links, int componentCount, int l
 	buffer1 = new bool[componentCount] { 0 };
 	buffer2 = new bool[componentCount] { 0 };
 	buffer3 = new bool[componentCount] { 0 };
+	std::fill_n(buffer1, componentCount, 1);
 
 	readBuffer = Board::buffer1;
 	writeBuffer = Board::buffer2;
@@ -86,6 +87,7 @@ void Board::init(Component** components, Link** links, int componentCount, int l
 	buffer1 = new bool[componentCount] { 0 };
 	buffer2 = new bool[componentCount] { 0 };
 	buffer3 = new bool[componentCount] { 0 };
+	std::fill_n(buffer1, componentCount, 1);
 
 	readBuffer = Board::buffer1;
 	writeBuffer = Board::buffer2;
@@ -106,10 +108,18 @@ void Board::init(Component** components, Link** links, int componentCount, int l
 		wipeBuffer = readPointer;
 
 		tick++;
-		long long diff = (std::chrono::high_resolution_clock::now() - lastCapture).count();
+
+		std::chrono::high_resolution_clock::time_point timestamp = std::chrono::high_resolution_clock::now();
+
+		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+			currentState = Board::Stopped;
+			return;
+		}
+
+		long long diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
 			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
-			lastCapture = std::chrono::high_resolution_clock::now();
+			lastCapture = timestamp;
 			lastCaptureTick = tick;
 		}
 
@@ -159,23 +169,31 @@ void Board::stop() {
 	}
 }
 
-void Board::start() {
-	start(UINT64_MAX);
+void Board::start()
+{
+	Board::startInternal(UINT64_MAX, UINT64_MAX);
+}
+
+void Board::startManual(unsigned long long cyclesLeft)
+{
+	Board::startInternal(cyclesLeft, UINT64_MAX);
+}
+
+void Board::startTimeout(unsigned int ms)
+{
+	Board::startInternal(UINT64_MAX, (unsigned long long)ms * 10e5);
 }
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(unsigned long long cyclesLeft)
-{
+void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns) {
 	if (currentState != Board::Stopped)
 		return;
 
-	this->cyclesLeft = cyclesLeft;
 	currentState = Board::Running;
-	while (true) {
-		if (currentState == Board::Stopped)
-			return;
+	this->started = std::chrono::high_resolution_clock::now();
 
+	while (true) {
 		for (unsigned int i = 0; i < componentCount; i++) {
 			if (readBuffer[i])
 				components[i]->compute();
@@ -195,10 +213,18 @@ void Board::start(unsigned long long cyclesLeft)
 		wipeBuffer = readPointer;
 
 		tick++;
-		long long diff = (std::chrono::high_resolution_clock::now() - lastCapture).count();
+
+		std::chrono::high_resolution_clock::time_point timestamp = std::chrono::high_resolution_clock::now();
+
+		if ((timestamp - started).count() > ns) {
+			currentState = Board::Stopped;
+			return;
+		}
+
+		long long diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
 			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
-			lastCapture = std::chrono::high_resolution_clock::now();
+			lastCapture = timestamp;
 			lastCaptureTick = tick;
 		}
 
@@ -211,12 +237,14 @@ void Board::start(unsigned long long cyclesLeft)
 
 #else
 
-void Board::start(unsigned long long cyclesLeft)
+void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 {
 	if (currentState != Board::Stopped)
 		return;
 
 	this->cyclesLeft = cyclesLeft;
+	this->timeout = ns;
+
 	for (int i = 0; i < threadCount; i++) {
 		if (threads[i] != nullptr)
 			delete threads[i];

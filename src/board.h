@@ -31,9 +31,11 @@ public:
 	Events::Event<> tickEvent;
 	void stop();
 	void start();
-	void start(unsigned long long cyclesLeft);
+	void startManual(unsigned long long cyclesLeft);
+	void startTimeout(unsigned int ms);
 	
 private:
+	void startInternal(unsigned long long cyclesLeft, unsigned long long ms);
 	bool* buffer1 = nullptr;
 	bool* buffer2 = nullptr;
 	bool* buffer3 = nullptr;
@@ -45,8 +47,10 @@ private:
 	std::thread** threads = nullptr;
 	SpinlockBarrier* barrier = nullptr;
 	std::chrono::high_resolution_clock::time_point lastCapture;
+	std::chrono::high_resolution_clock::time_point started;
 	unsigned long long int lastCaptureTick = 0;
 	unsigned int componentIndex = 0;
 	unsigned long long cyclesLeft = 0;
+	unsigned long long timeout = 0;
 };
 
