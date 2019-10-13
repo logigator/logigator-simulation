@@ -13,6 +13,10 @@ public:
 	BUTTON(Board* board, Input** inputs, Output** outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
 	BUTTON(Board* board, Link** inputs, Link** outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
 
+	~BUTTON() {
+		delete tickEvent;
+	}
+
 	int getInputCount() {
 		return 0;
 	}

@@ -8,7 +8,7 @@ class Board;
 class Component
 {
 public:
-	~Component();
+	virtual ~Component();
 	virtual int getInputCount() = 0;
 	virtual int getOutputCount() = 0;
 	virtual void compute() = 0;
