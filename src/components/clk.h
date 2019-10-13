@@ -30,6 +30,10 @@ public:
 		outputChange();
 	}
 
+	~CLK() {
+		delete tickEvent;
+	}
+
 	int getInputCount() {
 		return 1;
 	}
