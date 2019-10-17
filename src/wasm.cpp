@@ -100,42 +100,51 @@ int initComponents(unsigned int count) {
 	return 0;
 }
 
-int initComponent(unsigned int index, std::string typeStr, uintptr_t inputsPtr, uintptr_t outputsPtr, unsigned int inputCount, unsigned int outputCount) {
-		const char* type = typeStr.c_str();
-		uint32_t* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
-		uint32_t* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
+int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, uintptr_t outputsPtr, unsigned int inputCount, unsigned int outputCount, int op1, int op2) {
+	uint32_t* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
+	uint32_t* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
 
-		Link** componentInputs = new Link*[inputCount];
+	Link** componentInputs = new Link*[inputCount];
 
-		for (unsigned int j = 0; j < inputCount; j++) {
-			componentInputs[j] = links[(unsigned int)inputs[j]];
-		}
+	for (unsigned int j = 0; j < inputCount; j++) {
+		componentInputs[j] = links[(unsigned int)inputs[j]];
+	}
 
-		Link** componentOutputs = new Link*[outputCount];
+	Link** componentOutputs = new Link*[outputCount];
 
-		for (unsigned int j = 0; j < outputCount; j++) {
-			componentOutputs[j] = links[(unsigned int)outputs[j]];
-		}
+	for (unsigned int j = 0; j < outputCount; j++) {
+		componentOutputs[j] = links[(unsigned int)outputs[j]];
+	}
 
-		if (!strcmp(type, "AND"))
-			components[index] = new AND(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "BUTTON"))
-			components[index] = new BUTTON(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "CLK"))
-			components[index] = new CLK(board, componentInputs, componentOutputs, 1);
-		else if (!strcmp(type, "DELAY"))
-			components[index] = new DELAY(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "NOT"))
+	switch (type)
+	{
+		case 1:
 			components[index] = new NOT(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "OR"))
+			break;
+		case 2:
+			components[index] = new AND(board, componentInputs, componentOutputs);
+			break;
+		case 3:
 			components[index] = new OR(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "SWITCH"))
-			components[index] = new SWITCH(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "XOR"))
+			break;
+		case 4:
 			components[index] = new XOR(board, componentInputs, componentOutputs);
-		else {
+			break;
+		case 5:
+			components[index] = new DELAY(board, componentInputs, componentOutputs);
+			break;
+		case 6:
+			components[index] = new CLK(board, componentInputs, componentOutputs, op1);
+			break;
+		case 20:
+			components[index] = new BUTTON(board, componentInputs, componentOutputs);
+			break;
+		case 21:
+			components[index] = new SWITCH(board, componentInputs, componentOutputs);
+			break;
+		default:
 			return 1;
-		}
+	}
 
 	return 0;
 }
