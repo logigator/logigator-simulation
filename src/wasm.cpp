@@ -195,6 +195,16 @@ uintptr_t getComponents() {
 	return (uintptr_t)states;
 }
 
+int destroy() {
+	delete board;
+	delete[] components;
+	delete[] links;
+
+	board = new Board();
+
+	return 0;
+}
+
 EMSCRIPTEN_BINDINGS(module)
 {
 	emscripten::function("test", &test);
@@ -211,6 +221,8 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("getStatus", &getStatus);
 	emscripten::function("getLinks", &getLinks, emscripten::allow_raw_pointers());
 	emscripten::function("getComponents", &getComponents, emscripten::allow_raw_pointers());
+
+	emscripten::function("destroy", &destroy);
 
 	emscripten::value_object<BoardStatus>("BoardStatus")
 		.field("tick", &BoardStatus::tick)

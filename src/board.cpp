@@ -24,12 +24,16 @@ Board::~Board() {
 	}
 	delete[] links;
 
+    #ifndef __EMSCRIPTEN__
+
 	for (int i = 0; i < threadCount; i++) {
 		delete threads[i];
 	}
 	delete[] threads;
-
 	delete barrier;
+
+	#endif
+
 	delete[] buffer1;
 	delete[] buffer2;
 	delete[] buffer3;
