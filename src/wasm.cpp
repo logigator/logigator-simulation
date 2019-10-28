@@ -83,7 +83,8 @@ int initBoard() {
 }
 
 int initLinks(unsigned int count) {
-	links = new Link*[count] { 0 };
+	if(count > 0)
+		links = new Link*[count] { 0 };
 	
 	for (unsigned int i = 0; i < count; i++) {
 		links[i] = new Link(board);
@@ -95,7 +96,8 @@ int initLinks(unsigned int count) {
 }
 
 int initComponents(unsigned int count) {
-	components = new Component*[count] { 0 };
+	if(count > 0)
+		components = new Component*[count] { 0 };
 	componentCount = count;
 	return 0;
 }
