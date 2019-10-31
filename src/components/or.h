@@ -8,7 +8,7 @@ class OR :
 	public Component
 {
 public:
-	OR(Board* board, Input** inputs, Output** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
+	OR(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
 	OR(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
 
 	int getInputCount() {
@@ -20,7 +20,7 @@ public:
 	}
 
 	void compute() {
-		outputs[0]->setPowered(inputs[0]->getPowered() || inputs[1]->getPowered());
+		outputs[0].setPowered(inputs[0].getPowered() || inputs[1].getPowered());
 	}
 };
 

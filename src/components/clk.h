@@ -12,11 +12,11 @@ class CLK :
 public:
 	int speed = 1;
 
-	CLK(Board* board, Input** inputs, Output** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
+	CLK(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
 		outputChange();
 	}
 
-	CLK(Board* board, Input** inputs, Output** outputs, int speed) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
+	CLK(Board* board, Input* inputs, Output* outputs, int speed) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
 		this->speed = speed;
 		outputChange();
 	}
@@ -52,17 +52,17 @@ private:
 		tickCount++;
 
 		if (tickCount >= speed) {
-			if (outputs[0]->getPowered())
-				outputs[0]->setPowered(false);
+			if (outputs[0].getPowered())
+				outputs[0].setPowered(false);
 			else
-				outputs[0]->setPowered(true);
+				outputs[0].setPowered(true);
 
 			tickCount = 0;
 		}
 	});
 	
 	void outputChange() {
-		if (inputs[0]->getPowered()) {
+		if (inputs[0].getPowered()) {
 			if (subscribed) {
 				board->tickEvent -= tickEvent;
 				subscribed = false;
