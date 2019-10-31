@@ -36,7 +36,7 @@ int test() {
 
 	std::string linksString = std::string("Links:");
 	for (unsigned int i = 0; i < board->linkCount; i++) {
-		linksString += std::string(" ") + std::to_string(board->getLinks()[i]->powered);
+		linksString += std::string(" ") + std::to_string(*board->getLinks()[i]->powered);
 	}
 	printf("%s", (linksString + std::string("\n")).c_str());
 
@@ -83,8 +83,8 @@ int initBoard() {
 }
 
 int initLinks(unsigned int count) {
-	if(count > 0)
-		links = new Link*[count] { 0 };
+	if (count > 0)
+		links = new Link* [count];
 	
 	for (unsigned int i = 0; i < count; i++) {
 		links[i] = new Link(board);
@@ -162,13 +162,7 @@ BoardStatus getStatus() {
 }
 
 uintptr_t getLinks() {
-	uint8_t* links = new uint8_t[linkCount];
-
-	for (unsigned int i = 0; i < linkCount; i++) {
-		links[i] = board->getLinks()[i]->powered;
-	}
-
-	return (uintptr_t)links;
+	return (uintptr_t)board->linkStates;
 }
 
 uintptr_t getComponents() {
