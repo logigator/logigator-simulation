@@ -191,8 +191,11 @@ uintptr_t getComponents() {
 
 int destroy() {
 	delete board;
-	delete[] components;
-	delete[] links;
+
+    components = nullptr;
+    links = nullptr;
+	componentCount = 0;
+	linkCount = 0;
 
 	board = new Board();
 

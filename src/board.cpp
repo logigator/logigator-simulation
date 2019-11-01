@@ -19,7 +19,7 @@ Board::~Board() {
 	}
 	delete[] components;
 
-	delete links;
+	delete[] links;
 
     #ifndef __EMSCRIPTEN__
 
