@@ -1,5 +1,5 @@
 #!/bin/bash
 for filename in *.js; do
-	printf "${filename%.*}: "
+	printf "%s: " "${filename%.*}"
     node "$filename"
 done
