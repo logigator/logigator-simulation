@@ -31,7 +31,7 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	unsigned int componentCount = 0;
 	unsigned int linkCount = 0;
 	Component** components;
-	Link** links;
+	Link* links;
 
 	std::string identifier(*Nan::Utf8String(args[0]));
 	v8::Local<v8::Object> obj = args[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
@@ -41,20 +41,20 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		return;
 	}
 
+	if (!Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->IsNumber()) {
+		Nan::ThrowError("Invalid number of links!");
+		return;
+	}
+
 	Board* board = new Board();
 
 	if (Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->IsNumber())
 		threadCount = Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
 
-	if (Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->IsNumber()) {
-		linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
-		links = new Link*[linkCount] { 0 };
-		for (unsigned int i = 0; i < linkCount; i++) {
-			links[i] = new Link(board);
-		}
-	}
-	else {
-		links = new Link*[0];
+	linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
+	links = new Link[linkCount];
+	for (unsigned int i = 0; i < linkCount; i++) {
+		new (&links[i]) Link(board);
 	}
 
 	if (Nan::Get(obj, Nan::New("components").ToLocalChecked()).ToLocalChecked()->IsArray()) {
@@ -69,12 +69,12 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 			v8::Local<v8::Array> v8ComponentInputs = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("inputs").ToLocalChecked()).ToLocalChecked());
 			Link** componentInputs = new Link*[v8ComponentInputs->Length()];
 			for (unsigned int j = 0; j < v8ComponentInputs->Length(); j++)
-				componentInputs[j] = links[Nan::Get(v8ComponentInputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
+				componentInputs[j] = &links[Nan::Get(v8ComponentInputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
 
 			v8::Local<v8::Array> v8ComponentOutputs = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("outputs").ToLocalChecked()).ToLocalChecked());
 			Link** componentOutputs = new Link*[v8ComponentOutputs->Length()];
 			for (unsigned int j = 0; j < v8ComponentOutputs->Length(); j++)
-				componentOutputs[j] = links[Nan::Get(v8ComponentOutputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
+				componentOutputs[j] = &links[Nan::Get(v8ComponentOutputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
 			
 			if (!strcmp(componentType, "AND"))
 				components[i] = new AND(board, componentInputs, componentOutputs);
@@ -205,14 +205,14 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		v8::Local<v8::Array> v8Component = Nan::New<v8::Array>();
 
 		for (int j = 0; j < component->getOutputCount(); j++)
-			Nan::Set(v8Component, j, Nan::New(component->outputs[j]->getPowered()));
+			Nan::Set(v8Component, j, Nan::New(component->outputs[j].getPowered()));
 
 		Nan::Set(v8Components, i, v8Component);
 	}
 
 	v8::Local<v8::Array> v8Links = Nan::New<v8::Array>();
 	for (unsigned int i = 0; i < board->linkCount; i++) {
-		Nan::Set(v8Links, i, Nan::New(board->getLinks()[i]->powered));
+		Nan::Set(v8Links, i, Nan::New(board->linkStates[i]));
 	}
 
 	v8::Local<v8::Object> v8Board = Nan::New<v8::Object>();

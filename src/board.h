@@ -13,18 +13,19 @@ class Board
 public:
 	Board();
 	~Board();
-	void init(Component** components, Link** links, int componentCount, int linkCount);
-	void init(Component** components, Link** links, int componentCount, int linkCount, int threadCount);
+	void init(Component** components, Link* links, int componentCount, int linkCount);
+	void init(Component** components, Link* links, int componentCount, int linkCount, int threadCount);
 	unsigned int getNextComponentIndex();
 	bool* readBuffer = nullptr;
 	bool* writeBuffer = nullptr;
 	bool* wipeBuffer = nullptr;
 	size_t componentCount = 0;
 	size_t linkCount = 0;
+	bool* linkStates = nullptr;
 	enum State { Uninitialized, Stopped, Running, Stopping };
 	int getThreadCount();
 	Component** getComponents();
-	Link** getLinks();
+	Link* getLinks();
 	State getCurrentState();
 	unsigned long long int getCurrentTick();
 	unsigned long long currentSpeed = 0;
@@ -41,7 +42,7 @@ private:
 	bool* buffer3 = nullptr;
 	int threadCount = 1;
 	Component** components = nullptr;
-	Link** links = nullptr;
+	Link* links = nullptr;
 	State currentState = Board::Uninitialized;
 	unsigned long long int tick = 0;
 	std::thread** threads = nullptr;

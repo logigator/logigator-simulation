@@ -1,7 +1,9 @@
 @ECHO OFF
 
 IF EXIST webAssembly\dist\logigator-simulation.wasm (
-	exit /b 0
+    IF NOT EXIST webAssembly\emscripten\ (
+        exit /b 0
+    )
 )
 
 IF NOT EXIST webAssembly\emscripten\ (

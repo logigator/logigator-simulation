@@ -6,6 +6,7 @@ class Link;
 class Input
 {
 public:
+	Input();
 	Input(Component* component, Link* link);
 	~Input();
 	bool getPowered();

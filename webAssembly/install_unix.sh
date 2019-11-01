@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -f 'webAssembly/dist/logigator-simulation.wasm' ]; then
+if [ -f 'webAssembly/dist/logigator-simulation.wasm' ] && [ ! -d 'webAssembly/emscripten' ]; then
   exit 0
 fi
 

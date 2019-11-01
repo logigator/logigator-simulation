@@ -16,7 +16,7 @@
 
 Board* board = new Board();
 Component** components = nullptr;
-Link** links = nullptr;
+Link* links = nullptr;
 
 unsigned int componentCount = 0;
 unsigned int linkCount = 0;
@@ -36,7 +36,7 @@ int test() {
 
 	std::string linksString = std::string("Links:");
 	for (unsigned int i = 0; i < board->linkCount; i++) {
-		linksString += std::string(" ") + std::to_string(board->getLinks()[i]->powered);
+		linksString += std::string(" ") + std::to_string(*board->getLinks()[i].powered);
 	}
 	printf("%s", (linksString + std::string("\n")).c_str());
 
@@ -44,12 +44,12 @@ int test() {
 	for (unsigned int i = 0; i < board->componentCount; i++) {
 		str += std::string("\n [") + std::to_string(i) + std::string("]\n  Inputs: ");
 		for (unsigned int j = 0; j < board->getComponents()[i]->getInputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->inputs[j]->getPowered());
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->inputs[j].getPowered());
 		}
 
 		str += std::string("\n  Outputs:");
 		for (unsigned int j = 0; j < board->getComponents()[i]->getOutputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->outputs[j]->getPowered());
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->outputs[j].getPowered());
 		}
 	}
 	printf("%s", (str + std::string("\n")).c_str());
@@ -83,59 +83,68 @@ int initBoard() {
 }
 
 int initLinks(unsigned int count) {
-	links = new Link*[count] { 0 };
-	
+	links = new Link[count];
+
 	for (unsigned int i = 0; i < count; i++) {
-		links[i] = new Link(board);
+		new(&links[i]) Link(board);
 	}
 
 	linkCount = count;
-
 	return 0;
 }
 
 int initComponents(unsigned int count) {
-	components = new Component*[count] { 0 };
+	if(count > 0)
+		components = new Component*[count] { 0 };
 	componentCount = count;
 	return 0;
 }
 
-int initComponent(unsigned int index, std::string typeStr, uintptr_t inputsPtr, uintptr_t outputsPtr, unsigned int inputCount, unsigned int outputCount) {
-		const char* type = typeStr.c_str();
-		uint32_t* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
-		uint32_t* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
+int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, uintptr_t outputsPtr, unsigned int inputCount, unsigned int outputCount, int op1, int op2) {
+	uint32_t* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
+	uint32_t* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
 
-		Link** componentInputs = new Link*[inputCount];
+	Link** componentInputs = new Link*[inputCount];
 
-		for (unsigned int j = 0; j < inputCount; j++) {
-			componentInputs[j] = links[(unsigned int)inputs[j]];
-		}
+	for (unsigned int j = 0; j < inputCount; j++) {
+		componentInputs[j] = &links[(unsigned int)inputs[j]];
+	}
 
-		Link** componentOutputs = new Link*[outputCount];
+	Link** componentOutputs = new Link*[outputCount];
 
-		for (unsigned int j = 0; j < outputCount; j++) {
-			componentOutputs[j] = links[(unsigned int)outputs[j]];
-		}
+	for (unsigned int j = 0; j < outputCount; j++) {
+		componentOutputs[j] = &links[(unsigned int)outputs[j]];
+	}
 
-		if (!strcmp(type, "AND"))
-			components[index] = new AND(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "BUTTON"))
-			components[index] = new BUTTON(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "CLK"))
-			components[index] = new CLK(board, componentInputs, componentOutputs, 1);
-		else if (!strcmp(type, "DELAY"))
-			components[index] = new DELAY(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "NOT"))
+	switch (type)
+	{
+		case 1:
 			components[index] = new NOT(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "OR"))
+			break;
+		case 2:
+			components[index] = new AND(board, componentInputs, componentOutputs);
+			break;
+		case 3:
 			components[index] = new OR(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "SWITCH"))
-			components[index] = new SWITCH(board, componentInputs, componentOutputs);
-		else if (!strcmp(type, "XOR"))
+			break;
+		case 4:
 			components[index] = new XOR(board, componentInputs, componentOutputs);
-		else {
+			break;
+		case 5:
+			components[index] = new DELAY(board, componentInputs, componentOutputs);
+			break;
+		case 6:
+			components[index] = new CLK(board, componentInputs, componentOutputs, op1);
+			break;
+		case 20:
+			components[index] = new BUTTON(board, componentInputs, componentOutputs);
+			break;
+		case 21:
+			components[index] = new SWITCH(board, componentInputs, componentOutputs);
+			break;
+		default:
 			return 1;
-		}
+	}
 
 	return 0;
 }
@@ -151,13 +160,7 @@ BoardStatus getStatus() {
 }
 
 uintptr_t getLinks() {
-	uint8_t* links = new uint8_t[linkCount];
-
-	for (unsigned int i = 0; i < linkCount; i++) {
-		links[i] = board->getLinks()[i]->powered;
-	}
-
-	return (uintptr_t)links;
+	return (uintptr_t)board->linkStates;
 }
 
 uintptr_t getComponents() {
@@ -175,15 +178,28 @@ uintptr_t getComponents() {
 		Component* component = board->getComponents()[i];
 		
 		for (int j = 0; j < component->getInputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->inputs[j]->getPowered();
+			states[stateIndex++] = (uint8_t)component->inputs[j].getPowered();
 		}
 
 		for (int j = 0; j < component->getOutputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->outputs[j]->getPowered();
+			states[stateIndex++] = (uint8_t)component->outputs[j].getPowered();
 		}
 	}
 
 	return (uintptr_t)states;
+}
+
+int destroy() {
+	delete board;
+
+    components = nullptr;
+    links = nullptr;
+	componentCount = 0;
+	linkCount = 0;
+
+	board = new Board();
+
+	return 0;
 }
 
 EMSCRIPTEN_BINDINGS(module)
@@ -202,6 +218,8 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("getStatus", &getStatus);
 	emscripten::function("getLinks", &getLinks, emscripten::allow_raw_pointers());
 	emscripten::function("getComponents", &getComponents, emscripten::allow_raw_pointers());
+
+	emscripten::function("destroy", &destroy);
 
 	emscripten::value_object<BoardStatus>("BoardStatus")
 		.field("tick", &BoardStatus::tick)
