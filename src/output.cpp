@@ -4,6 +4,10 @@
 #include "board.h"
 #include "component.h"
 
+Output::Output()
+{
+}
+
 Output::Output(Component* component, Link* link)
 {
 	this->component = component;

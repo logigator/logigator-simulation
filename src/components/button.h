@@ -10,7 +10,7 @@ class BUTTON :
 	public UserInputComponent
 {
 public:
-	BUTTON(Board* board, Input** inputs, Output** outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
+	BUTTON(Board* board, Input* inputs, Output* outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
 	BUTTON(Board* board, Link** inputs, Link** outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
 
 	~BUTTON() {
@@ -33,7 +33,7 @@ public:
 		if (inputEvent != InputEvent::Down)
 			return;
 
-		outputs[0]->setPowered(true);
+		outputs[0].setPowered(true);
 		if (!subscribed) {
 			subscribed = true;
 			board->tickEvent += tickEvent;
@@ -44,7 +44,7 @@ public:
 private:
 	bool subscribed = false;
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
-		outputs[0]->setPowered(false);
+		outputs[0].setPowered(false);
 		board->tickEvent -= tickEvent;
 		subscribed = false;
 	});

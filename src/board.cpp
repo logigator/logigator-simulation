@@ -19,9 +19,6 @@ Board::~Board() {
 	}
 	delete[] components;
 
-	for (unsigned int i = 0; i < linkCount; i++) {
-		delete links[i];
-	}
 	delete[] links;
 
     #ifndef __EMSCRIPTEN__
@@ -42,12 +39,12 @@ Board::~Board() {
 
 #ifdef __EMSCRIPTEN__
 
-void Board::init(Component** components, Link** links, int componentCount, int linkCount, int threadCount)
+void Board::init(Component** components, Link* links, int componentCount, int linkCount, int threadCount)
 {
 	Board::init(components, links, componentCount, linkCount);
 }
 
-void Board::init(Component** components, Link** links, int componentCount, int linkCount)
+void Board::init(Component** components, Link* links, int componentCount, int linkCount)
 {
 	if (currentState != Board::Uninitialized)
 		return;
@@ -59,7 +56,7 @@ void Board::init(Component** components, Link** links, int componentCount, int l
 
 	this->linkStates = new bool[linkCount] { 0 };
 	for (int i = 0; i < linkCount; i++) {
-		links[i]->powered = &this->linkStates[i];
+		links[i].powered = &this->linkStates[i];
 	}
 
 	buffer1 = new bool[componentCount] { 0 };
@@ -78,12 +75,12 @@ void Board::init(Component** components, Link** links, int componentCount, int l
 
 #else
 
-void Board::init(Component** components, Link** links, int componentCount, int linkCount)
+void Board::init(Component** components, Link* links, int componentCount, int linkCount)
 {
 	Board::init(components, links, componentCount, linkCount, 1);
 }
 
-void Board::init(Component** components, Link** links, int componentCount, int linkCount, int threadCount)
+void Board::init(Component** components, Link* links, int componentCount, int linkCount, int threadCount)
 {
 	if (currentState != Board::Uninitialized)
 		return;
@@ -96,7 +93,7 @@ void Board::init(Component** components, Link** links, int componentCount, int l
 
 	this->linkStates = new bool[linkCount] { 0 };
 	for (int i = 0; i < linkCount; i++) {
-		links[i]->powered = &this->linkStates[i];
+		links[i].powered = &this->linkStates[i];
 	}
 
 	buffer1 = new bool[componentCount] { 0 };
@@ -160,7 +157,7 @@ Component** Board::getComponents() {
 	return components;
 }
 
-Link** Board::getLinks()
+Link* Board::getLinks()
 {
 	return links;
 }
@@ -216,7 +213,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns) 
 		}
 
 		for (unsigned int i = 0; i < linkCount; i++) {
-			*links[i]->powered = std::any_of(links[i]->outputs, links[i]->outputs + links[i]->outputCount, [](Output* x) { return x->getPowered(); });
+			*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 		}
 
 		tickEvent.emit(nullptr, Events::EventArgs());
@@ -278,7 +275,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 				barrier->wait();
 
 				for (unsigned int i = id; i < linkCount; i += threadCount) {
-					*links[i]->powered = std::any_of(links[i]->outputs, links[i]->outputs + links[i]->outputCount, [](Output* x) { return x->getPowered(); });
+					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 				}
 
 				barrier->wait();
