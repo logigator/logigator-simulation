@@ -2,6 +2,10 @@
 #include "output.h"
 #include "input.h"
 
+Link::Link()
+{
+}
+
 Link::Link(Board* board) :
 	board(board),
 	inputCount(0),

@@ -7,6 +7,7 @@ class Board;
 class Link
 {
 public:
+	Link();
 	Link(Board* board);
 	Link(Board* board, Input** inputs, Output** outputs, int inputCount, int outputCount);
 	~Link();

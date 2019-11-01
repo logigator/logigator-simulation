@@ -16,7 +16,7 @@
 
 Board* board = new Board();
 Component** components = nullptr;
-Link** links = nullptr;
+Link* links = nullptr;
 
 unsigned int componentCount = 0;
 unsigned int linkCount = 0;
@@ -36,7 +36,7 @@ int test() {
 
 	std::string linksString = std::string("Links:");
 	for (unsigned int i = 0; i < board->linkCount; i++) {
-		linksString += std::string(" ") + std::to_string(*board->getLinks()[i]->powered);
+		linksString += std::string(" ") + std::to_string(*board->getLinks()[i].powered);
 	}
 	printf("%s", (linksString + std::string("\n")).c_str());
 
@@ -44,12 +44,12 @@ int test() {
 	for (unsigned int i = 0; i < board->componentCount; i++) {
 		str += std::string("\n [") + std::to_string(i) + std::string("]\n  Inputs: ");
 		for (unsigned int j = 0; j < board->getComponents()[i]->getInputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->inputs[j]->getPowered());
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->inputs[j].getPowered());
 		}
 
 		str += std::string("\n  Outputs:");
 		for (unsigned int j = 0; j < board->getComponents()[i]->getOutputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->outputs[j]->getPowered());
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->outputs[j].getPowered());
 		}
 	}
 	printf("%s", (str + std::string("\n")).c_str());
@@ -83,15 +83,13 @@ int initBoard() {
 }
 
 int initLinks(unsigned int count) {
-	if (count > 0)
-		links = new Link* [count];
-	
+	links = new Link[count];
+
 	for (unsigned int i = 0; i < count; i++) {
-		links[i] = new Link(board);
+		new(&links[i]) Link(board);
 	}
 
 	linkCount = count;
-
 	return 0;
 }
 
@@ -109,13 +107,13 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 	Link** componentInputs = new Link*[inputCount];
 
 	for (unsigned int j = 0; j < inputCount; j++) {
-		componentInputs[j] = links[(unsigned int)inputs[j]];
+		componentInputs[j] = &links[(unsigned int)inputs[j]];
 	}
 
 	Link** componentOutputs = new Link*[outputCount];
 
 	for (unsigned int j = 0; j < outputCount; j++) {
-		componentOutputs[j] = links[(unsigned int)outputs[j]];
+		componentOutputs[j] = &links[(unsigned int)outputs[j]];
 	}
 
 	switch (type)
@@ -180,11 +178,11 @@ uintptr_t getComponents() {
 		Component* component = board->getComponents()[i];
 		
 		for (int j = 0; j < component->getInputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->inputs[j]->getPowered();
+			states[stateIndex++] = (uint8_t)component->inputs[j].getPowered();
 		}
 
 		for (int j = 0; j < component->getOutputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->outputs[j]->getPowered();
+			states[stateIndex++] = (uint8_t)component->outputs[j].getPowered();
 		}
 	}
 

@@ -52,7 +52,7 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		threadCount = Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
 
 	linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
-	links = (Link*)malloc(sizeof(Link) * linkCount);
+	links = new Link[linkCount];
 	for (unsigned int i = 0; i < linkCount; i++) {
 		new (&links[i]) Link(board);
 	}

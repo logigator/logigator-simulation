@@ -21,12 +21,12 @@ Component::Component(Board* board, Link** inputs, Link** outputs, int inputCount
 	inputCount(inputCount),
 	outputCount(outputCount)
 {
-	this->inputs = (Input*)malloc(sizeof(Input) * inputCount);
+	this->inputs = new Input[inputCount];
 	for (int i = 0; i < inputCount; i++) {
 		new (&this->inputs[i]) Input(this, inputs[i]);
 	}
 
-	this->outputs = (Output*)malloc(sizeof(Output) * outputCount);
+	this->outputs = new Output[outputCount];
 	for (int i = 0; i < outputCount; i++) {
 		new (&this->outputs[i]) Output(this, outputs[i]);
 	}
@@ -54,6 +54,6 @@ Component::Component(Board* board, Link** inputs, Link** outputs, int inputCount
 }
 
 Component::~Component() {
-	delete inputs;
-	delete outputs;
+	delete[] inputs;
+	delete[] outputs;
 }

@@ -56,7 +56,7 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 
 	this->linkStates = new bool[linkCount] { 0 };
 	for (int i = 0; i < linkCount; i++) {
-		links[i]->powered = &this->linkStates[i];
+		links[i].powered = &this->linkStates[i];
 	}
 
 	buffer1 = new bool[componentCount] { 0 };
@@ -93,7 +93,7 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 
 	this->linkStates = new bool[linkCount] { 0 };
 	for (int i = 0; i < linkCount; i++) {
-		links[i]->powered = &this->linkStates[i];
+		links[i].powered = &this->linkStates[i];
 	}
 
 	buffer1 = new bool[componentCount] { 0 };

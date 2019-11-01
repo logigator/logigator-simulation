@@ -2,6 +2,10 @@
 #include "component.h"
 #include "link.h"
 
+Input::Input()
+{
+}
+
 Input::Input(Component* component, Link* link) :
 	component(component),
 	link(link)
