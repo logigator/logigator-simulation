@@ -212,7 +212,7 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 
 	v8::Local<v8::Array> v8Links = Nan::New<v8::Array>();
 	for (unsigned int i = 0; i < board->linkCount; i++) {
-		Nan::Set(v8Links, i, Nan::New(board->getLinks()[i].powered));
+		Nan::Set(v8Links, i, Nan::New(board->linkStates[i]));
 	}
 
 	v8::Local<v8::Object> v8Board = Nan::New<v8::Object>();

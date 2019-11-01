@@ -8,7 +8,7 @@ Link::Link(Board* board) :
 	outputCount(0),
 	inputs(nullptr),
 	outputs(nullptr),
-	powered(false)
+	powered(nullptr)
 {
 }
 
@@ -18,7 +18,7 @@ Link::Link(Board* board, Input** inputs, Output** outputs, int inputCount, int o
 	outputs(outputs),
 	inputCount(inputCount),
 	outputCount(outputCount),
-	powered(false)
+	powered(nullptr)
 {
 }
 

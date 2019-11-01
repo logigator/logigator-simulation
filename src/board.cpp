@@ -31,6 +31,7 @@ Board::~Board() {
 
 	#endif
 
+	delete[] linkStates;
 	delete[] buffer1;
 	delete[] buffer2;
 	delete[] buffer3;
@@ -52,6 +53,11 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 	this->links = links;
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
+
+	this->linkStates = new bool[linkCount] { 0 };
+	for (int i = 0; i < linkCount; i++) {
+		links[i]->powered = &this->linkStates[i];
+	}
 
 	buffer1 = new bool[componentCount] { 0 };
 	buffer2 = new bool[componentCount] { 0 };
@@ -84,6 +90,11 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 	this->threadCount = threadCount;
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
+
+	this->linkStates = new bool[linkCount] { 0 };
+	for (int i = 0; i < linkCount; i++) {
+		links[i]->powered = &this->linkStates[i];
+	}
 
 	buffer1 = new bool[componentCount] { 0 };
 	buffer2 = new bool[componentCount] { 0 };
@@ -202,7 +213,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns) 
 		}
 
 		for (unsigned int i = 0; i < linkCount; i++) {
-			links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
+			*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 		}
 
 		tickEvent.emit(nullptr, Events::EventArgs());
@@ -264,7 +275,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 				barrier->wait();
 
 				for (unsigned int i = id; i < linkCount; i += threadCount) {
-					links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
+					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 				}
 
 				barrier->wait();

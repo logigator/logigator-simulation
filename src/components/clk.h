@@ -13,21 +13,25 @@ public:
 	int speed = 1;
 
 	CLK(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
-		outputChange();
+		board->tickEvent += tickEvent;
+        subscribed = true;
 	}
 
 	CLK(Board* board, Input* inputs, Output* outputs, int speed) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
 		this->speed = speed;
-		outputChange();
+		board->tickEvent += tickEvent;
+        subscribed = true;
 	}
 
 	CLK(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
-		outputChange();
+		board->tickEvent += tickEvent;
+        subscribed = true;
 	}
 
 	CLK(Board* board, Link** inputs, Link** outputs, int speed) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
 		this->speed = speed;
-		outputChange();
+		board->tickEvent += tickEvent;
+        subscribed = true;
 	}
 
 	~CLK() {

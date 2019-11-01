@@ -21,6 +21,7 @@ public:
 	bool* wipeBuffer = nullptr;
 	size_t componentCount = 0;
 	size_t linkCount = 0;
+	bool* linkStates = nullptr;
 	enum State { Uninitialized, Stopped, Running, Stopping };
 	int getThreadCount();
 	Component** getComponents();
