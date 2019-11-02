@@ -94,8 +94,7 @@ int initLinks(unsigned int count) {
 }
 
 int initComponents(unsigned int count) {
-	if(count > 0)
-		components = new Component*[count] { 0 };
+	components = new Component*[count];
 	componentCount = count;
 	return 0;
 }
