@@ -54,15 +54,26 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
 
-	this->linkStates = new bool[linkCount] { 0 };
+	if (linkCount > 0)
+		this->linkStates = new bool[linkCount] { 0 };
+	else
+		this->linkStates = new bool[0];
+	    
 	for (int i = 0; i < linkCount; i++) {
 		links[i].powered = &this->linkStates[i];
 	}
 
-	buffer1 = new bool[componentCount] { 0 };
-	buffer2 = new bool[componentCount] { 0 };
-	buffer3 = new bool[componentCount] { 0 };
-	std::fill_n(buffer1, componentCount, 1);
+	if (componentCount > 0) {
+		buffer1 = new bool[componentCount] { 0 };
+		buffer2 = new bool[componentCount] { 0 };
+		buffer3 = new bool[componentCount] { 0 };
+		std::fill_n(buffer1, componentCount, 1);
+	}
+	else {
+		buffer1 = new bool[0];
+		buffer2 = new bool[0];
+		buffer3 = new bool[0];
+	}
 
 	readBuffer = Board::buffer1;
 	writeBuffer = Board::buffer2;
@@ -91,15 +102,26 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
 
-	this->linkStates = new bool[linkCount] { 0 };
+	if (linkCount > 0)
+		this->linkStates = new bool[linkCount] { 0 };
+	else
+		this->linkStates = new bool[0];
+
 	for (int i = 0; i < linkCount; i++) {
 		links[i].powered = &this->linkStates[i];
 	}
 
-	buffer1 = new bool[componentCount] { 0 };
-	buffer2 = new bool[componentCount] { 0 };
-	buffer3 = new bool[componentCount] { 0 };
-	std::fill_n(buffer1, componentCount, 1);
+	if (componentCount > 0) {
+		buffer1 = new bool[componentCount] { 0 };
+		buffer2 = new bool[componentCount] { 0 };
+		buffer3 = new bool[componentCount] { 0 };
+		std::fill_n(buffer1, componentCount, 1);
+	}
+	else {
+		buffer1 = new bool[0];
+		buffer2 = new bool[0];
+		buffer3 = new bool[0];
+	}
 
 	readBuffer = Board::buffer1;
 	writeBuffer = Board::buffer2;
