@@ -77,7 +77,7 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				componentOutputs[j] = &links[Nan::Get(v8ComponentOutputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
 			
 			if (!strcmp(componentType, "AND"))
-				components[i] = new AND(board, componentInputs, componentOutputs);
+				components[i] = new AND(board, componentInputs, componentOutputs, 2);
 			else if (!strcmp(componentType, "BUTTON"))
 				components[i] = new BUTTON(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "CLK"))
