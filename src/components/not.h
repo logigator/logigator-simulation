@@ -8,16 +8,8 @@ class NOT :
 	public Component
 {
 public:
-	NOT(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-	NOT(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-
-	int getInputCount() {
-		return 1;
-	}
-
-	int getOutputCount() {
-		return 1;
-	}
+	NOT(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, 1, 1) { }
+	NOT(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 1, 1) { }
 
 	void compute() {
 		outputs[0].setPowered(!inputs[0].getPowered());

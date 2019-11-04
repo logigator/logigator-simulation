@@ -77,7 +77,7 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				componentOutputs[j] = &links[Nan::Get(v8ComponentOutputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
 			
 			if (!strcmp(componentType, "AND"))
-				components[i] = new AND(board, componentInputs, componentOutputs, 2);
+				components[i] = AND::generateOptimized(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 			else if (!strcmp(componentType, "BUTTON"))
 				components[i] = new BUTTON(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "CLK"))
@@ -87,11 +87,11 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 			else if (!strcmp(componentType, "NOT"))
 				components[i] = new NOT(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "OR"))
-				components[i] = new OR(board, componentInputs, componentOutputs);
+				components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 			else if (!strcmp(componentType, "SWITCH"))
 				components[i] = new SWITCH(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "XOR"))
-				components[i] = new XOR(board, componentInputs, componentOutputs);
+				components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 			else {
 				Nan::ThrowTypeError((std::string("Error: Component '") + std::string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
 				return;
@@ -204,7 +204,7 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		Component* component = board->getComponents()[i];
 		v8::Local<v8::Array> v8Component = Nan::New<v8::Array>();
 
-		for (int j = 0; j < component->getOutputCount(); j++)
+		for (unsigned int j = 0; j < component->getOutputCount(); j++)
 			Nan::Set(v8Component, j, Nan::New(component->outputs[j].getPowered()));
 
 		Nan::Set(v8Components, i, v8Component);
@@ -247,7 +247,7 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 
 	int inputIndex = args[2]->Int32Value(Nan::GetCurrentContext()).FromJust();
-	if (inputIndex < 0 || inputIndex > userInputComponent->getUserInputCount()) {
+	if (inputIndex < 0 || (unsigned int)inputIndex > userInputComponent->getUserInputCount()) {
 		Nan::ThrowTypeError("InputIndex is out of range!");
 		return;
 	}

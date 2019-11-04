@@ -57,3 +57,13 @@ Component::~Component() {
 	delete[] inputs;
 	delete[] outputs;
 }
+
+unsigned int Component::getInputCount()
+{
+	return inputCount;
+}
+
+unsigned int Component::getOutputCount()
+{
+	return outputCount;
+}
