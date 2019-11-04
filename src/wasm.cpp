@@ -6,12 +6,11 @@
 #include "link.h"
 
 #include "and.h"
-#include "button.h"
 #include "clk.h"
 #include "delay.h"
 #include "not.h"
 #include "or.h"
-#include "switch.h"
+#include "user_input.h"
 #include "xor.h"
 
 Board* board = new Board();
@@ -135,11 +134,8 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 		case 6:
 			components[index] = new CLK(board, componentInputs, componentOutputs, op1);
 			break;
-		case 20:
-			components[index] = new BUTTON(board, componentInputs, componentOutputs);
-			break;
-		case 21:
-			components[index] = new SWITCH(board, componentInputs, componentOutputs);
+		case 100:
+			components[index] = new UserInput(board, componentOutputs, outputCount);
 			break;
 		default:
 			return 1;
