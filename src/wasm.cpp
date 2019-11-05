@@ -114,31 +114,32 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 		componentOutputs[j] = &links[(unsigned int)outputs[j]];
 	}
 
-	switch (type)
-	{
-		case 1:
-			components[index] = new NOT(board, componentInputs, componentOutputs);
-			break;
-		case 2:
-			components[index] = new AND(board, componentInputs, componentOutputs, inputCount);
-			break;
-		case 3:
-			components[index] = new OR(board, componentInputs, componentOutputs, inputCount);
-			break;
-		case 4:
-			components[index] = new XOR(board, componentInputs, componentOutputs, inputCount);
-			break;
-		case 5:
-			components[index] = new DELAY(board, componentInputs, componentOutputs);
-			break;
-		case 6:
-			components[index] = new CLK(board, componentInputs, componentOutputs, op1);
-			break;
-		case 100:
-			components[index] = new UserInput(board, componentOutputs, outputCount);
-			break;
-		default:
-			return 1;
+	if(type >= 200 && type < 300) {
+		components[index] = new UserInput(board, componentOutputs, outputCount);
+	} else {
+		switch (type)
+		{
+			case 1:
+				components[index] = new NOT(board, componentInputs, componentOutputs);
+				break;
+			case 2:
+				components[index] = new AND(board, componentInputs, componentOutputs, inputCount);
+				break;
+			case 3:
+				components[index] = new OR(board, componentInputs, componentOutputs, inputCount);
+				break;
+			case 4:
+				components[index] = new XOR(board, componentInputs, componentOutputs, inputCount);
+				break;
+			case 5:
+				components[index] = new DELAY(board, componentInputs, componentOutputs);
+				break;
+			case 6:
+				components[index] = new CLK(board, componentInputs, componentOutputs, op1);
+				break;
+			default:
+				return 1;
+		}
 	}
 
 	return 0;
