@@ -22,14 +22,23 @@ public:
 			this->outputs[i].setPowered(state[i]);
 		}
 
-		if (inputEvent == InputEvent::Pulse)
+		if (inputEvent == InputEvent::Pulse && !subscribed) {
 			board->tickEvent += tickEvent;
+			subscribed = true;
+		}
+		else if (inputEvent != InputEvent::Pulse && subscribed) {
+			board->tickEvent -= tickEvent;
+			subscribed = false;
+		}
 	}
 private:
+	bool subscribed = false;
+
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		for (unsigned int i = 0; i < outputCount; i++) {
 			this->outputs[i].setPowered(false);
 		}
 		board->tickEvent -= tickEvent;
+		subscribed = false;
 	});
 };
