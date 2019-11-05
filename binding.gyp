@@ -31,7 +31,6 @@
 		"src/components/or.h",
 		"src/components/switch.h",
 		"src/components/xor.h"
-		
 	  ]
     }
   ]

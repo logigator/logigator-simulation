@@ -12,23 +12,23 @@ class CLK :
 public:
 	int speed = 1;
 
-	CLK(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
+	CLK(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, 1, 1) {
 		board->tickEvent += tickEvent;
         subscribed = true;
 	}
 
-	CLK(Board* board, Input* inputs, Output* outputs, int speed) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
+	CLK(Board* board, Input* inputs, Output* outputs, int speed) : Component(board, inputs, outputs, 1, 1) {
 		this->speed = speed;
 		board->tickEvent += tickEvent;
         subscribed = true;
 	}
 
-	CLK(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
+	CLK(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 1, 1) {
 		board->tickEvent += tickEvent;
         subscribed = true;
 	}
 
-	CLK(Board* board, Link** inputs, Link** outputs, int speed) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) {
+	CLK(Board* board, Link** inputs, Link** outputs, int speed) : Component(board, inputs, outputs, 1, 1) {
 		this->speed = speed;
 		board->tickEvent += tickEvent;
         subscribed = true;
@@ -36,14 +36,6 @@ public:
 
 	~CLK() {
 		delete tickEvent;
-	}
-
-	int getInputCount() {
-		return 1;
-	}
-
-	int getOutputCount() {
-		return 1;
 	}
 
 	void compute() {

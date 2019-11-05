@@ -121,13 +121,13 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 			components[index] = new NOT(board, componentInputs, componentOutputs);
 			break;
 		case 2:
-			components[index] = new AND(board, componentInputs, componentOutputs);
+			components[index] = new AND(board, componentInputs, componentOutputs, inputCount);
 			break;
 		case 3:
-			components[index] = new OR(board, componentInputs, componentOutputs);
+			components[index] = new OR(board, componentInputs, componentOutputs, inputCount);
 			break;
 		case 4:
-			components[index] = new XOR(board, componentInputs, componentOutputs);
+			components[index] = new XOR(board, componentInputs, componentOutputs, inputCount);
 			break;
 		case 5:
 			components[index] = new DELAY(board, componentInputs, componentOutputs);
