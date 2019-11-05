@@ -144,6 +144,21 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 	return 0;
 }
 
+int triggerInput(unsigned int index, int event, uintptr_t state) {
+	if (index > board->componentCount) {
+		return 1;
+	}
+	if (event < 0 || event >= UserInput::InputEvent::Max) {
+    	return 2;
+    }
+
+	UserInput::InputEvent inputEvent = static_cast<UserInput::InputEvent>(event);
+	UserInput* userInput = (UserInput*)(board->getComponents()[index]);
+
+	userInput->triggerUserInput((bool*)reinterpret_cast<uint8_t*>(state), inputEvent);
+	return 0;
+}
+
 BoardStatus getStatus() {
 	return BoardStatus {
 		(double) board->getCurrentTick(),
@@ -204,6 +219,7 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("initLinks", &initLinks);
 	emscripten::function("initComponents", &initComponents);
 	emscripten::function("initComponent", &initComponent, emscripten::allow_raw_pointers());
+	emscripten::function("triggerInput", &triggerInput, emscripten::allow_raw_pointers());
 
 	emscripten::function("start", &start);
 	emscripten::function("startTimeout", &startTimeout);

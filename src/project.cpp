@@ -237,12 +237,8 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 	
 	UserInput* userInput = (UserInput*)(board->getComponents()[componentIndex]);
-	if (!userInput) {
-		Nan::ThrowTypeError("Component is not an user input!");
-		return;
-	}
-
 	UserInput::InputEvent inputEvent = static_cast<UserInput::InputEvent>(args[2]->Int32Value(Nan::GetCurrentContext()).FromJust());
+
 	if (inputEvent < 0 || inputEvent >= UserInput::InputEvent::Max) {
 		Nan::ThrowTypeError("InputEvent invalid!");
 		return;
