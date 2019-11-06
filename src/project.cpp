@@ -8,15 +8,13 @@
 #include "board.h"
 #include "component.h"
 #include "link.h"
-#include "user_input_component.h"
 
 #include "and.h"
-#include "button.h"
 #include "clk.h"
 #include "delay.h"
 #include "not.h"
 #include "or.h"
-#include "switch.h"
+#include "user_input.h"
 #include "xor.h"
 
 std::map<std::string, Board*> boards;
@@ -78,8 +76,8 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 			
 			if (!strcmp(componentType, "AND"))
 				components[i] = AND::generateOptimized(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-			else if (!strcmp(componentType, "BUTTON"))
-				components[i] = new BUTTON(board, componentInputs, componentOutputs);
+			else if (!strcmp(componentType, "INPUT"))
+				components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
 			else if (!strcmp(componentType, "CLK"))
 				components[i] = new CLK(board, componentInputs, componentOutputs, Nan::Get(v8Component, Nan::New("CLK_Speed").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust());
 			else if (!strcmp(componentType, "DELAY"))
@@ -88,8 +86,6 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				components[i] = new NOT(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "OR"))
 				components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-			else if (!strcmp(componentType, "SWITCH"))
-				components[i] = new SWITCH(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "XOR"))
 				components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 			else {
@@ -222,8 +218,8 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 4 || !args[0]->IsName() || !args[1]->IsNumber() || !args[2]->IsNumber() || !args[3]->IsNumber()) {
-		Nan::ThrowSyntaxError("Usage: newBoards([String]identifier, [Number]componentIndex, [Number]inputIndex, [Number]inputEvent");
+	if (args.Length() != 4 || !args[0]->IsName() || !args[1]->IsNumber() || !args[2]->IsNumber() || !args[3]->IsArray()) {
+		Nan::ThrowSyntaxError("Usage: newBoards([String]identifier, [Number]componentIndex, [Number]inputEvent, [Array(bool)]outputs");
 		return;
 	}
 	std::string identifier(*Nan::Utf8String(args[0]));
@@ -240,25 +236,26 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		return;
 	}
 	
-	UserInputComponent* userInputComponent = (UserInputComponent*)(board->getComponents()[componentIndex]);
-	if (userInputComponent == nullptr) {
-		Nan::ThrowTypeError("Component is not an user input!");
-		return;
-	}
+	UserInput* userInput = (UserInput*)(board->getComponents()[componentIndex]);
+	UserInput::InputEvent inputEvent = static_cast<UserInput::InputEvent>(args[2]->Int32Value(Nan::GetCurrentContext()).FromJust());
 
-	int inputIndex = args[2]->Int32Value(Nan::GetCurrentContext()).FromJust();
-	if (inputIndex < 0 || (unsigned int)inputIndex > userInputComponent->getUserInputCount()) {
-		Nan::ThrowTypeError("InputIndex is out of range!");
-		return;
-	}
-
-	UserInputComponent::InputEvent inputEvent = static_cast<UserInputComponent::InputEvent>(args[3]->Int32Value(Nan::GetCurrentContext()).FromJust());
-	if (inputEvent < 0 || inputEvent > 1) {
+	if (inputEvent < 0 || inputEvent >= UserInput::InputEvent::Max) {
 		Nan::ThrowTypeError("InputEvent invalid!");
 		return;
 	}
 
-	userInputComponent->triggerUserInput(inputIndex, inputEvent);
+	v8::Local<v8::Array> stateArray = v8::Local<v8::Array>::Cast(args[3]);
+
+	if (userInput->getOutputCount() <= 0)
+		return;
+
+	bool* state = new bool[userInput->getOutputCount()] { 0 };
+
+	for (unsigned int i = 0; i < stateArray->Length(); i++) {
+		state[i] = Nan::To<bool>(Nan::Get(stateArray, i).ToLocalChecked()).FromMaybe(false);
+	}
+	
+	userInput->triggerUserInput(state, inputEvent);
 }
 
 void Initialize(v8::Local<v8::Object> exports) {
