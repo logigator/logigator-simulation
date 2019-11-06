@@ -252,7 +252,7 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	bool* state = new bool[userInput->getOutputCount()] { 0 };
 
 	for (unsigned int i = 0; i < stateArray->Length(); i++) {
-		state[i] = stateArray->Get(i)->BooleanValue(Nan::GetCurrentContext()).FromJust();
+		state[i] = Nan::Get(stateArray, i)->BooleanValue(Nan::GetCurrentContext()).FromJust();
 	}
 	
 	userInput->triggerUserInput(state, inputEvent);
