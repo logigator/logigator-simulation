@@ -8,19 +8,57 @@ class AND :
 	public Component
 {
 public:
-	AND(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-	AND(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
+	AND(Board* board, Input* inputs, Output* outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	AND(Board* board, Link** inputs, Link** outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
-	int getInputCount() {
-		return 2;
+	virtual void compute() {
+		for (unsigned int i = 0; i < inputCount; i++) {
+			if (!inputs[i].getPowered()) {
+				outputs[0].setPowered(false);
+				return;
+			}
+		}
+		outputs[0].setPowered(true);
 	}
 
-	int getOutputCount() {
-		return 1;
-	}
+	static AND* generateOptimized(Board* board, Link** inputs, Link** outputs, unsigned int inputCount);
+private:
+
+};
+
+class AND_2 :
+	public AND
+{
+public:
+	AND_2(Board* board, Input* inputs, Output* outputs) : AND(board, inputs, outputs, 2) { }
+	AND_2(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 2) { }
 
 	void compute() {
 		outputs[0].setPowered(inputs[0].getPowered() && inputs[1].getPowered());
 	}
+private:
 };
 
+class AND_3 :
+	public AND
+{
+public:
+	AND_3(Board* board, Input* inputs, Output* outputs) : AND(board, inputs, outputs, 2) { }
+	AND_3(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 2) { }
+
+	void compute() {
+		outputs[0].setPowered(inputs[0].getPowered() && inputs[1].getPowered() && inputs[2].getPowered());
+	}
+private:
+};
+
+AND* AND::generateOptimized(Board* board, Link** inputs, Link** outputs, unsigned int inputCount) {
+	switch (inputCount) {
+	case 2:
+		return new AND_2(board, inputs, outputs);
+	case 3:
+		return new AND_3(board, inputs, outputs);
+	default:
+		return new AND(board, inputs, outputs, inputCount);
+	}
+}

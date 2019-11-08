@@ -9,20 +9,8 @@ class SWITCH :
 	public UserInputComponent
 {
 public:
-	SWITCH(Board* board, Input* inputs, Output* outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-	SWITCH(Board* board, Link** inputs, Link** outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-
-	int getInputCount() {
-		return 0;
-	}
-
-	int getOutputCount() {
-		return 1;
-	}
-
-	int getUserInputCount() {
-		return 1;
-	}
+	SWITCH(Board* board, Input* inputs, Output* outputs) : UserInputComponent(board, inputs, outputs, 0, 1, 1) { }
+	SWITCH(Board* board, Link** inputs, Link** outputs) : UserInputComponent(board, inputs, outputs, 0, 1, 1) { }
 
 	void triggerUserInput(int i, InputEvent inputEvent) {
 		if(inputEvent == InputEvent::Down)

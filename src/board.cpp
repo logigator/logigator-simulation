@@ -132,15 +132,14 @@ void Board::init(Component** components, Link* links, int componentCount, int li
 	threads = new std::thread*[threadCount] { nullptr };
 	lastCapture = std::chrono::high_resolution_clock::now();
 
-	barrier = new SpinlockBarrier(threadCount, [this]() {	
-		tickEvent.emit(nullptr, Events::EventArgs());
-
+	barrier = new SpinlockBarrier(threadCount, [this]() {
 		bool* readPointer(readBuffer);
 
 		readBuffer = writeBuffer;
 		writeBuffer = wipeBuffer;
 		wipeBuffer = readPointer;
 
+		tickEvent.emit(nullptr, Events::EventArgs());
 		tick++;
 
 		std::chrono::high_resolution_clock::time_point timestamp = std::chrono::high_resolution_clock::now();
@@ -238,14 +237,13 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns) 
 			*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 		}
 
-		tickEvent.emit(nullptr, Events::EventArgs());
-
 		bool* readPointer(readBuffer);
 
 		readBuffer = writeBuffer;
 		writeBuffer = wipeBuffer;
 		wipeBuffer = readPointer;
 
+        tickEvent.emit(nullptr, Events::EventArgs());
 		tick++;
 
 		std::chrono::high_resolution_clock::time_point timestamp = std::chrono::high_resolution_clock::now();

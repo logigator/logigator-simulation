@@ -6,12 +6,11 @@
 #include "link.h"
 
 #include "and.h"
-#include "button.h"
 #include "clk.h"
 #include "delay.h"
 #include "not.h"
 #include "or.h"
-#include "switch.h"
+#include "user_input.h"
 #include "xor.h"
 
 Board* board = new Board();
@@ -115,36 +114,49 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 		componentOutputs[j] = &links[(unsigned int)outputs[j]];
 	}
 
-	switch (type)
-	{
-		case 1:
-			components[index] = new NOT(board, componentInputs, componentOutputs);
-			break;
-		case 2:
-			components[index] = new AND(board, componentInputs, componentOutputs);
-			break;
-		case 3:
-			components[index] = new OR(board, componentInputs, componentOutputs);
-			break;
-		case 4:
-			components[index] = new XOR(board, componentInputs, componentOutputs);
-			break;
-		case 5:
-			components[index] = new DELAY(board, componentInputs, componentOutputs);
-			break;
-		case 6:
-			components[index] = new CLK(board, componentInputs, componentOutputs, op1);
-			break;
-		case 20:
-			components[index] = new BUTTON(board, componentInputs, componentOutputs);
-			break;
-		case 21:
-			components[index] = new SWITCH(board, componentInputs, componentOutputs);
-			break;
-		default:
-			return 1;
+	if(type >= 200 && type < 300) {
+		components[index] = new UserInput(board, componentOutputs, outputCount);
+	} else {
+		switch (type)
+		{
+			case 1:
+				components[index] = new NOT(board, componentInputs, componentOutputs);
+				break;
+			case 2:
+				components[index] = new AND(board, componentInputs, componentOutputs, inputCount);
+				break;
+			case 3:
+				components[index] = new OR(board, componentInputs, componentOutputs, inputCount);
+				break;
+			case 4:
+				components[index] = new XOR(board, componentInputs, componentOutputs, inputCount);
+				break;
+			case 5:
+				components[index] = new DELAY(board, componentInputs, componentOutputs);
+				break;
+			case 6:
+				components[index] = new CLK(board, componentInputs, componentOutputs, op1);
+				break;
+			default:
+				return 1;
+		}
 	}
 
+	return 0;
+}
+
+int triggerInput(unsigned int index, int event, uintptr_t state) {
+	if (index > board->componentCount) {
+		return 1;
+	}
+	if (event < 0 || event >= UserInput::InputEvent::Max) {
+    	return 2;
+    }
+
+	UserInput::InputEvent inputEvent = static_cast<UserInput::InputEvent>(event);
+	UserInput* userInput = (UserInput*)(board->getComponents()[index]);
+
+	userInput->triggerUserInput((bool*)reinterpret_cast<uint8_t*>(state), inputEvent);
 	return 0;
 }
 
@@ -208,6 +220,7 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("initLinks", &initLinks);
 	emscripten::function("initComponents", &initComponents);
 	emscripten::function("initComponent", &initComponent, emscripten::allow_raw_pointers());
+	emscripten::function("triggerInput", &triggerInput, emscripten::allow_raw_pointers());
 
 	emscripten::function("start", &start);
 	emscripten::function("startTimeout", &startTimeout);
