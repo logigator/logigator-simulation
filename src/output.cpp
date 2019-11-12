@@ -2,7 +2,7 @@
 #include "board.h"
 #include "component.h"
 
-void Output::setPowered(bool state)
+void Output::setPowered(const bool state)
 {
 	if (state != powered) {
 		powered = state;

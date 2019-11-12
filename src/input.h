@@ -6,9 +6,7 @@ class Component;
 class Input
 {
 public:
-	Input()
-	{
-	}
+	Input() = default;
 
 	Input(Component* component, Link* link) :
 		component(component),
@@ -16,21 +14,19 @@ public:
 	{
 	}
 
-	~Input()
-	{
-	}
+	~Input() = default;
 
-	bool getPowered()
+	bool getPowered() const
 	{
 		return *link->powered;
 	};
 
-	Component* getComponent()
+	Component* getComponent() const
 	{
 		return component;
 	}
 
-	Link* getLink()
+	Link* getLink() const
 	{
 		return link;
 	}

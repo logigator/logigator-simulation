@@ -8,10 +8,10 @@ class AND :
 	public Component
 {
 public:
-	AND(Board* board, Input* inputs, Output* outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
-	AND(Board* board, Link** inputs, Link** outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	AND(Board* board, Input* inputs, Output* outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	AND(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
-	virtual void compute() {
+	void compute() override {
 		for (unsigned int i = 0; i < inputCount; i++) {
 			if (!inputs[i].getPowered()) {
 				outputs[0].setPowered(false);
@@ -33,7 +33,7 @@ public:
 	AND_2(Board* board, Input* inputs, Output* outputs) : AND(board, inputs, outputs, 2) { }
 	AND_2(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 2) { }
 
-	void compute() {
+	void compute() override {
 		outputs[0].setPowered(inputs[0].getPowered() && inputs[1].getPowered());
 	}
 private:
@@ -46,13 +46,13 @@ public:
 	AND_3(Board* board, Input* inputs, Output* outputs) : AND(board, inputs, outputs, 2) { }
 	AND_3(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 2) { }
 
-	void compute() {
+	void compute() override {
 		outputs[0].setPowered(inputs[0].getPowered() && inputs[1].getPowered() && inputs[2].getPowered());
 	}
 private:
 };
 
-AND* AND::generateOptimized(Board* board, Link** inputs, Link** outputs, unsigned int inputCount) {
+inline AND* AND::generateOptimized(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) {
 	switch (inputCount) {
 	case 2:
 		return new AND_2(board, inputs, outputs);

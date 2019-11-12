@@ -7,7 +7,7 @@
 class SpinlockBarrier
 {
 public:
-	explicit SpinlockBarrier(unsigned int count) :
+	explicit SpinlockBarrier(const unsigned int count) :
 		m_count(count), m_generation(0),
 		m_count_reset_value(count),
 		m_post_phase_action(nullptr),
@@ -16,7 +16,7 @@ public:
 	{
 	}
 
-	explicit SpinlockBarrier(unsigned int count, std::function<void()> post_phase_action) :
+	explicit SpinlockBarrier(const unsigned int count, std::function<void()> post_phase_action) :
 		m_count(count), m_generation(0),
 		m_count_reset_value(count),
 		m_post_phase_action(post_phase_action),
@@ -25,7 +25,7 @@ public:
 	{
 	}
 
-	explicit SpinlockBarrier(unsigned int count, std::function<void()> post_phase_action, unsigned int post_phase_action_interval) :
+	explicit SpinlockBarrier(const unsigned int count, std::function<void()> post_phase_action, const unsigned int post_phase_action_interval) :
 		m_count(count), m_generation(0),
 		m_count_reset_value(count),
 		m_post_phase_action(post_phase_action),
@@ -44,7 +44,7 @@ public:
 			return;
 		}
 
-		unsigned int gen = m_generation;
+		const unsigned int gen = m_generation;
 		if (!--m_count)
 		{
 			if (m_post_phase_action != nullptr && !--m_post_phase_action_count) {

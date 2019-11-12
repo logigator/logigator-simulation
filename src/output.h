@@ -4,41 +4,42 @@
 class Output
 {
 public:
-	Output()
+	Output() :
+		component(nullptr),
+		link(nullptr),
+		powered(false)
 	{
 	}
 
-	Output(Component* component, Link* link)
-	{
-		this->component = component;
-		this->link = link;
-		this->powered = false;
-	}
-
-	~Output()
+	Output(Component* component, Link* link) :
+		component(component),
+		link(link),
+		powered(false)
 	{
 	}
 
-	bool getPowered()
+	~Output() = default;
+
+	bool getPowered() const
 	{
 		return powered;
 	}
 
 	void setPowered(bool state);
 
-	Component* getComponent()
+	Component* getComponent() const
 	{
 		return component;
 	}
 
-	Link* getLink()
+	Link* getLink() const
 	{
 		return link;
 	}
 	
 private:
-	bool powered;
 	Component* component;
 	Link* link;
+	bool powered;
 };
 

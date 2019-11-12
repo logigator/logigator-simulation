@@ -3,7 +3,7 @@
 #include "output.h"
 #include "link.h"
 #include "board.h"
-#include <memory>
+#include <cstring>
 
 class Component
 {
@@ -18,22 +18,22 @@ public:
 
 	unsigned int componentIndex;
 	
-	Input* getInputs()
+	Input* getInputs() const
 	{
 		return inputs;
 	}
 
-	Output* getOutputs()
+	Output* getOutputs() const
 	{
 		return outputs;
 	}
 
-	unsigned int getInputCount()
+	unsigned int getInputCount() const
 	{
 		return inputCount;
 	};
 
-	unsigned int getOutputCount()
+	unsigned int getOutputCount() const
 	{
 		return outputCount;
 	};
@@ -45,24 +45,24 @@ protected:
 	unsigned int inputCount;
 	unsigned int outputCount;
 
-	Component(Board* board, Link** inputs, Link** outputs, int inputCount, int outputCount) :
+	Component(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount, const unsigned int outputCount) :
 		board(board),
 		inputCount(inputCount),
 		outputCount(outputCount)
 	{
 		this->inputs = new Input[inputCount];
-		for (int i = 0; i < inputCount; i++) {
+		for (unsigned int i = 0; i < inputCount; i++) {
 			new (&this->inputs[i]) Input(this, inputs[i]);
 		}
 
 		this->outputs = new Output[outputCount];
-		for (int i = 0; i < outputCount; i++) {
+		for (unsigned int i = 0; i < outputCount; i++) {
 			new (&this->outputs[i]) Output(this, outputs[i]);
 		}
 
 
-		for (int i = 0; i < inputCount; i++) {
-			Input** newInputs = new Input * [inputs[i]->inputCount + 1];
+		for (unsigned int i = 0; i < inputCount; i++) {
+			auto** newInputs = new Input* [inputs[i]->inputCount + 1u];
 			std::memcpy(newInputs, inputs[i]->inputs, inputs[i]->inputCount * sizeof(Input*));
 			newInputs[inputs[i]->inputCount] = &this->inputs[i];
 			delete[] inputs[i]->inputs;
@@ -70,8 +70,8 @@ protected:
 			inputs[i]->inputCount++;
 		}
 
-		for (int i = 0; i < outputCount; i++) {
-			Output** newOutputs = new Output * [outputs[i]->outputCount + 1];
+		for (unsigned int i = 0; i < outputCount; i++) {
+			auto** newOutputs = new Output * [outputs[i]->outputCount + 1];
 			std::memcpy(newOutputs, outputs[i]->outputs, outputs[i]->outputCount * sizeof(Output*));
 			newOutputs[outputs[i]->outputCount] = &this->outputs[i];
 			delete[] outputs[i]->outputs;
@@ -82,7 +82,7 @@ protected:
 		componentIndex = board->getNextComponentIndex();
 	}
 
-	Component(Board* board, Input* inputs, Output* outputs, int inputCount, int outputCount) :
+	Component(Board* board, Input* inputs, Output* outputs, const unsigned int inputCount, const unsigned int outputCount) :
 		board(board),
 		inputs(inputs),
 		outputs(outputs),

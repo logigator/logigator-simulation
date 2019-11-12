@@ -5,14 +5,14 @@
 
 class Barrier {
 public:
-	explicit Barrier(std::size_t iCount) :
+	explicit Barrier(const std::size_t iCount) :
 		mThreshold(iCount),
 		mCount(iCount),
 		mGeneration(0),
 		mPostPhaseAction(nullptr) {
 	}
 
-	explicit Barrier(std::size_t iCount, std::function<void()> postPhaseAction) :
+	explicit Barrier(const std::size_t iCount, std::function<void()> postPhaseAction) :
 		mThreshold(iCount),
 		mCount(iCount),
 		mGeneration(0),
