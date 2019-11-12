@@ -92,23 +92,23 @@ int initLinks(unsigned int count) {
 	return 0;
 }
 
-int initComponents(unsigned int count) {
+int initComponents(const unsigned int count) {
 	components = new Component*[count];
 	componentCount = count;
 	return 0;
 }
 
-int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, uintptr_t outputsPtr, unsigned int inputCount, unsigned int outputCount, int op1, int op2) {
-	uint32_t* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
-	uint32_t* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
+int initComponent(const unsigned int index, const unsigned int type, const uintptr_t inputsPtr, const uintptr_t outputsPtr, const unsigned int inputCount, const unsigned int outputCount, const int op1, const int op2) {
+	auto* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
+	auto* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
 
-	Link** componentInputs = new Link*[inputCount];
+	auto** componentInputs = new Link*[inputCount];
 
 	for (unsigned int j = 0; j < inputCount; j++) {
 		componentInputs[j] = &links[(unsigned int)inputs[j]];
 	}
 
-	Link** componentOutputs = new Link*[outputCount];
+	auto** componentOutputs = new Link*[outputCount];
 
 	for (unsigned int j = 0; j < outputCount; j++) {
 		componentOutputs[j] = &links[(unsigned int)outputs[j]];
@@ -153,8 +153,8 @@ int triggerInput(unsigned int index, int event, uintptr_t state) {
     	return 2;
     }
 
-	UserInput::InputEvent inputEvent = static_cast<UserInput::InputEvent>(event);
-	UserInput* userInput = (UserInput*)(board->getComponents()[index]);
+	const auto inputEvent = static_cast<UserInput::InputEvent>(event);
+	auto* userInput = (UserInput*)(board->getComponents()[index]);
 
 	userInput->triggerUserInput((bool*)reinterpret_cast<uint8_t*>(state), inputEvent);
 	return 0;
@@ -182,7 +182,7 @@ uintptr_t getComponents() {
 		arraySize += board->getComponents()[i]->getOutputCount();
 	}
 
-	uint8_t* states = new uint8_t[arraySize];
+	auto* states = new uint8_t[arraySize];
 
 	uint_fast32_t stateIndex = 0;
 	for (size_t i = 0; i < board->componentCount; i++) {

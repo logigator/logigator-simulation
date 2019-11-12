@@ -238,13 +238,9 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 			wipeBuffer[i] = false;
 		}
 
-		for (unsigned int i = 0; i < linkCount; i++) {
-			for(unsigned int j = 0; j < links[i].outputCount; j++) {
-				if (readBuffer[links[i].outputs[j]->getComponent()->componentIndex]) {
-					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
-					break;
-				}
-			}
+		for (unsigned int i = id; i < linkCount; i += threadCount) {
+			if (std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [this](Output* x) { return readBuffer[x->getComponent()->componentIndex]; }))
+				* links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 		}
 
 		auto* readPointer(readBuffer);
@@ -305,14 +301,9 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 				barrier->wait();
 
 				for (unsigned int i = id; i < linkCount; i += threadCount) {
-					for (unsigned int j = 0; j < links[i].outputCount; j++) {
-						if (readBuffer[links[i].outputs[j]->getComponent()->componentIndex]) {
-							*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
-							break;
-						}
-					}
+					if(std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [this](Output* x) { return readBuffer[x->getComponent()->componentIndex]; }))
+						*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 				}
-
 				barrier->wait();
 			}
 		}, i);
