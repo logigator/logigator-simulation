@@ -15,4 +15,4 @@ em++ -O0 --bind \
  -o webAssembly/dist/logigator-simulation.js \
  -Isrc/ \
  -Isrc/components/ \
- src/wasm.cpp src/board.cpp src/input.cpp src/output.cpp src/link.cpp src/component.cpp || exit 1
+ src/wasm.cpp src/board.cpp src/output.cpp || exit 1

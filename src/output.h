@@ -1,21 +1,44 @@
 #pragma once
 
-class Component;
-class Link;
 
 class Output
 {
 public:
-	Output();
-	Output(Component* component, Link* link);
-	~Output();
-	bool getPowered();
+	Output()
+	{
+	}
+
+	Output(Component* component, Link* link)
+	{
+		this->component = component;
+		this->link = link;
+		this->powered = false;
+	}
+
+	~Output()
+	{
+	}
+
+	bool getPowered()
+	{
+		return powered;
+	}
+
 	void setPowered(bool state);
-	Component* getComponent();
-	Link* getLink();
+
+	Component* getComponent()
+	{
+		return component;
+	}
+
+	Link* getLink()
+	{
+		return link;
+	}
+	
 private:
+	bool powered;
 	Component* component;
 	Link* link;
-	bool powered;
 };
 

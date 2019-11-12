@@ -43,12 +43,12 @@ int test() {
 	for (unsigned int i = 0; i < board->componentCount; i++) {
 		str += std::string("\n [") + std::to_string(i) + std::string("]\n  Inputs: ");
 		for (unsigned int j = 0; j < board->getComponents()[i]->getInputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->inputs[j].getPowered());
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->getInputs()[j].getPowered());
 		}
 
 		str += std::string("\n  Outputs:");
 		for (unsigned int j = 0; j < board->getComponents()[i]->getOutputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->outputs[j].getPowered());
+			str += std::string(" ") + std::to_string(board->getComponents()[i]->getOutputs()[j].getPowered());
 		}
 	}
 	printf("%s", (str + std::string("\n")).c_str());
@@ -189,11 +189,11 @@ uintptr_t getComponents() {
 		Component* component = board->getComponents()[i];
 		
 		for (int j = 0; j < component->getInputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->inputs[j].getPowered();
+			states[stateIndex++] = (uint8_t)component->getInputs()[j].getPowered();
 		}
 
 		for (int j = 0; j < component->getOutputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->outputs[j].getPowered();
+			states[stateIndex++] = (uint8_t)component->getOutputs()[j].getPowered();
 		}
 	}
 
