@@ -15,7 +15,7 @@ public:
 	Input** inputs;
 	Output** outputs;
 	Board* board;
-	int inputCount;
-	int outputCount;
+	unsigned int inputCount;
+	unsigned int outputCount;
 };
 
