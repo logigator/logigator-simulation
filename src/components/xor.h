@@ -8,19 +8,15 @@ class XOR :
 	public Component
 {
 public:
-	XOR(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-	XOR(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-
-	int getInputCount() {
-		return 2;
-	}
-
-	int getOutputCount() {
-		return 1;
-	}
+	XOR(Board* board, Input* inputs, Output* outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	XOR(Board* board, Link** inputs, Link** outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
 	void compute() {
-		outputs[0].setPowered(inputs[0].getPowered() != inputs[1].getPowered());
+		unsigned int c = 0;
+		for (unsigned int i = 0; i < inputCount; i++) {
+			c += inputs[i].getPowered();
+		}
+		outputs[0].setPowered(c % 2);
 	}
 };
 

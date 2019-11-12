@@ -1,12 +1,3 @@
-declare module logicsim {
-    function newBoard(id: string, boardObject: BoardObject): void;
-    function startBoard(id: string, ticksToRun?: number): void;
-    function stopBoard(id: string): void;
-    function getBoardStatus(id: string): BoardStatus;
-    function getBoard(id: string): BoardState;
-    function triggerInput(id: string, indexToTrigger: number, inputIndex: number, state: 1 | 0): void;
-}
-
 declare type BoardObject = {
     links: number;
     threads: number;
@@ -31,6 +22,19 @@ declare type BoardState = {
     links: boolean[];
 }
 
-declare type Components = 'SWITCH' | 'XOR' | 'AND' | 'OR' | 'NOT' | 'BUTTON' | 'DELAY' | 'CLK';
+declare type Components = 'XOR' | 'AND' | 'OR' | 'NOT' | 'INPUT' | 'DELAY' | 'CLK';
+declare enum InputEvent {
+    Cont,
+    Pulse
+}
+
+declare module logicsim {
+    function newBoard(id: string, boardObject: BoardObject): void;
+    function startBoard(id: string, ticksToRun?: number): void;
+    function stopBoard(id: string): void;
+    function getBoardStatus(id: string): BoardStatus;
+    function getBoard(id: string): BoardState;
+    function triggerInput(id: string, componentIndex: number, inputEvent: InputEvent, state: boolean[]): void;
+}
 
 export {logicsim, BoardState, BoardStatus, BoardObject};

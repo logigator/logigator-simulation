@@ -10,14 +10,14 @@ for (let fileIndex = 2; fileIndex < args.length; fileIndex++) {
 	
 	logicsim.newBoard("testBoard_" + fileIndex, config.board);
 	for (let i = 0; i < config.inputTriggers.length; i++) {
-		logicsim.triggerInput('testBoard_' + fileIndex, config.inputTriggers[i], 0, 0);
+		logicsim.triggerInput('testBoard_' + fileIndex, config.inputTriggers[i], 0, config.board.components[config.inputTriggers[i]].outputs.map(() => true));
 	}
 	
 	logicsim.startBoard('testBoard_' + fileIndex, config.ticks);
 	
 	while (logicsim.getBoardStatus('testBoard_' + fileIndex).currentState !== 1) {}
 	let boardState = logicsim.getBoard('testBoard_' + fileIndex);
-	
+
 	let errorOccurred = false;
 	for (let i = 0; i < config.expected.components.length; i++) {
 		for (let j = 0; j < config.expected.components[i].length; j++) {

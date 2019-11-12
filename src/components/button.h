@@ -10,23 +10,11 @@ class BUTTON :
 	public UserInputComponent
 {
 public:
-	BUTTON(Board* board, Input* inputs, Output* outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
-	BUTTON(Board* board, Link** inputs, Link** outputs) : UserInputComponent(board, inputs, outputs, getInputCount(), getOutputCount()) { }
+	BUTTON(Board* board, Input* inputs, Output* outputs) : UserInputComponent(board, inputs, outputs, 0, 1, 1) { }
+	BUTTON(Board* board, Link** inputs, Link** outputs) : UserInputComponent(board, inputs, outputs, 0, 1, 1) { }
 
 	~BUTTON() {
 		delete tickEvent;
-	}
-
-	int getInputCount() {
-		return 0;
-	}
-
-	int getOutputCount() {
-		return 1;
-	}
-
-	int getUserInputCount() {
-		return 1;
 	}
 
 	void triggerUserInput(int i, InputEvent inputEvent) {

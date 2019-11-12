@@ -9,17 +9,17 @@ class Component
 {
 public:
 	virtual ~Component();
-	virtual int getInputCount() = 0;
-	virtual int getOutputCount() = 0;
 	virtual void compute() = 0;
-	int componentIndex;
+	unsigned int componentIndex;
 	Input* inputs;
 	Output* outputs;
+	unsigned int getInputCount();
+	unsigned int getOutputCount();
+	
 protected:
 	Board* board;
 	Component(Board* board, Link** inputs, Link** outputs, int inputCount, int outputCount);
 	Component(Board* board, Input* inputs, Output* outputs, int inputCount, int outputCount);
-private:
-	int inputCount;
-	int outputCount;
+	unsigned int inputCount;
+	unsigned int outputCount;
 };
