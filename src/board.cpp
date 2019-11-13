@@ -6,7 +6,6 @@
 #include "link.h"
 #include "spinlock_barrier.h"
 #include "events.h"
-#include "output.h"
 
 #define __EMSCRIPTEN__
 
@@ -56,16 +55,21 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
 
+	bool* linkStatesNext;
+
 	if (linkCount > 0) {
 		this->linkStates = new bool[linkCount] { false };
+		linkStatesNext = new bool[linkCount] { false };
 		this->linkDefaults = new bool[componentCount] { false };
 	} else {
 		this->linkStates = new bool[0];
+		linkStatesNext = new bool[0];
 		this->linkDefaults = new bool[0];
 	}
 	    
 	for (unsigned int i = 0; i < linkCount; i++) {
 		links[i].poweredCurrent = &this->linkStates[i];
+		links[i].poweredNext = &linkStatesNext[i];
 		*links[i].poweredNext = this->linkDefaults[i];
 	}
 
@@ -248,9 +252,10 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 
 		for (unsigned int i = 0; i < linkCount; i++) {
 			bool rot = false;
-			for (unsigned int j = 0; j < links[i].inputCount; j++) {
-				if (readBuffer[links[i].inputs[j]->componentIndex]) {
+			for (unsigned int j = 0; j < links[i].outputCount; j++) {
+				if (readBuffer[links[i].outputs[j]->componentIndex]) {
 					rot = true;
+					break;
 				}
 			}
 			if (rot) {

@@ -9,7 +9,7 @@ public:
 	XOR(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
 	void compute() override {
-		if (outputs[0]->poweredNext)
+		if (*outputs[0]->poweredNext)
 			return;
 #pragma optimize( "", off )
 		unsigned int c = 0;

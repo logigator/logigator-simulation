@@ -23,7 +23,7 @@ public:
 			outputs[0].setPowered(true);
 			outputs[0].getLink()->lastUpdateTick = this->board->getCurrentTick();
 		}*/
-		if (outputs[0]->poweredNext)
+		if (*outputs[0]->poweredNext)
 			return;
 #pragma optimize( "", off )
 		for (unsigned int i = 0; i < inputCount; i++) {
@@ -47,7 +47,7 @@ public:
 	AND_2(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 2) { }
 
 	void compute() override {
-		if (outputs[0]->poweredNext)
+		if (*outputs[0]->poweredNext)
 			return;
 #pragma optimize( "", off )
 		if (*inputs[0]->poweredCurrent && *inputs[1]->poweredCurrent)
@@ -64,7 +64,7 @@ public:
 	AND_3(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 3) { }
 
 	void compute() override {
-		if (outputs[0]->poweredNext)
+		if (*outputs[0]->poweredNext)
 			return;
 #pragma optimize( "", off )
 		if (*inputs[0]->poweredCurrent && *inputs[1]->poweredCurrent && *inputs[2]->poweredCurrent)
