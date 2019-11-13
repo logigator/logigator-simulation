@@ -1,7 +1,5 @@
 #pragma once
 #include "component.h"
-#include "output.h"
-#include "input.h"
 #include "events.h"
 #include "board.h"
 
@@ -10,7 +8,6 @@ class UserInput :
 {
 public:
 	UserInput(Board* board, Link** outputs, const unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
-	UserInput(Board* board, Output* outputs, const unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
 
 	enum InputEvent { Cont, Pulse, Max };
 	
@@ -20,7 +17,7 @@ public:
 
 	void triggerUserInput(bool* state, const InputEvent inputEvent) {
 		for (unsigned int i = 0; i < outputCount; i++) {
-			this->outputs[i].setPowered(state[i]);
+			*this->outputs[i]->poweredNext = state[i];
 		}
 
 		if (inputEvent == InputEvent::Pulse && !subscribed) {
@@ -36,10 +33,13 @@ private:
 	bool subscribed = false;
 
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
-		for (unsigned int i = 0; i < outputCount; i++) {
-			this->outputs[i].setPowered(false);
+		for (unsigned int i = 0; i < this->outputCount; i++) {
+#pragma optimize( "", off )
+			if (!*this->outputs[0]->poweredNext)
+				*this->outputs[i]->poweredNext = true;
+#pragma optimize( "", on )
 		}
-		board->tickEvent -= tickEvent;
-		subscribed = false;
+		this->board->tickEvent -= this->tickEvent;
+		this->subscribed = false;
 	});
 };

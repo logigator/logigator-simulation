@@ -8,6 +8,8 @@
 #include "events.h"
 #include "output.h"
 
+#define __EMSCRIPTEN__
+
 Board::Board() = default;
 
 Board::~Board()
@@ -54,13 +56,17 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
 
-	if (linkCount > 0)
+	if (linkCount > 0) {
 		this->linkStates = new bool[linkCount] { false };
-	else
+		this->linkDefaults = new bool[componentCount] { false };
+	} else {
 		this->linkStates = new bool[0];
+		this->linkDefaults = new bool[0];
+	}
 	    
 	for (unsigned int i = 0; i < linkCount; i++) {
-		links[i].powered = &this->linkStates[i];
+		links[i].poweredCurrent = &this->linkStates[i];
+		*links[i].poweredNext = this->linkDefaults[i];
 	}
 
 	if (componentCount > 0) {
@@ -233,19 +239,34 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 
 	while (true) {
 		for (unsigned int i = 0; i < componentCount; i++) {
-			if (readBuffer[i])
+			if (readBuffer[i]) {
 				components[i]->compute();
+				writeBuffer[i] = true;
+			}
 			wipeBuffer[i] = false;
 		}
 
 		for (unsigned int i = 0; i < linkCount; i++) {
+			bool rot = false;
+			for (unsigned int j = 0; j < links[i].inputCount; j++) {
+				if (readBuffer[links[i].inputs[j]->componentIndex]) {
+					rot = true;
+				}
+			}
+			if (rot) {
+				*links[i].poweredCurrent = *links[i].poweredNext;
+				*links[i].poweredNext = linkDefaults[i];
+			}
+		}
+
+		/*for (unsigned int i = 0; i < linkCount; i++) {
 			for(unsigned int j = 0; j < links[i].outputCount; j++) {
 				if (readBuffer[links[i].outputs[j]->getComponent()->componentIndex]) {
 					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 					break;
 				}
 			}
-		}
+		}*/
 
 		auto* readPointer(readBuffer);
 
@@ -279,7 +300,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 
 #else
 
-void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
+void Board::startInternal(const unsigned long long cyclesLeft, const unsigned long long ns)
 {
 	if (currentState != Board::Stopped)
 		return;

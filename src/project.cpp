@@ -200,7 +200,7 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		const auto v8Component = Nan::New<v8::Array>();
 
 		for (unsigned int j = 0; j < component->getOutputCount(); j++)
-			Nan::Set(v8Component, j, Nan::New(component->getOutputs()[j].getPowered()));
+			Nan::Set(v8Component, j, Nan::New(component->getOutputs()[j]->poweredNext));
 
 		Nan::Set(v8Components, i, v8Component);
 	}

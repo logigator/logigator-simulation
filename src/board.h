@@ -19,6 +19,7 @@ public:
 	bool* readBuffer = nullptr;
 	bool* writeBuffer = nullptr;
 	bool* wipeBuffer = nullptr;
+	bool* linkDefaults = nullptr;
 	size_t componentCount = 0;
 	size_t linkCount = 0;
 	bool* linkStates = nullptr;
@@ -36,7 +37,7 @@ public:
 	void startTimeout(unsigned int ms);
 	
 private:
-	void startInternal(unsigned long long cyclesLeft, unsigned long long ms);
+	void startInternal(const unsigned long long cyclesLeft, const unsigned long long ns);
 	bool* buffer1 = nullptr;
 	bool* buffer2 = nullptr;
 	bool* buffer3 = nullptr;

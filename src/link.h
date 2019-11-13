@@ -1,4 +1,5 @@
 #pragma once
+#include "board.h"
 
 class Input;
 class Output;
@@ -8,11 +9,13 @@ class Link
 {
 public:
 	Board* board;
-	Input** inputs;
-	Output** outputs;
+	Component** inputs;
+	Component** outputs;
 	unsigned int inputCount;
 	unsigned int outputCount;
-	bool* powered;
+	bool* poweredNext;
+	bool* poweredCurrent;
+	unsigned long long lastUpdateTick;
 
 	Link() :
 		board(nullptr),
@@ -20,7 +23,9 @@ public:
 		outputs(nullptr),
 		inputCount(0),
 		outputCount(0),
-		powered(nullptr)
+		poweredNext(nullptr),
+		poweredCurrent(nullptr),
+		lastUpdateTick(0)
 	{
 	}
 
@@ -30,17 +35,21 @@ public:
 		outputs(nullptr),
 		inputCount(0),
 		outputCount(0),
-		powered(nullptr)
+		poweredNext(nullptr),
+		poweredCurrent(nullptr),
+		lastUpdateTick(board->getCurrentTick())
 	{
 	}
 
-	Link(Board* board, Input** inputs, Output** outputs, const unsigned int inputCount, const unsigned int outputCount) :
+	Link(Board* board, Component** inputs, Component** outputs, const unsigned int inputCount, const unsigned int outputCount) :
 		board(board),
 		inputs(inputs),
 		outputs(outputs),
 		inputCount(inputCount),
 		outputCount(outputCount),
-		powered(nullptr)
+		poweredNext(nullptr),
+		poweredCurrent(nullptr),
+		lastUpdateTick(board->getCurrentTick())
 	{
 	}
 

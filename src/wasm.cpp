@@ -28,33 +28,33 @@ struct BoardStatus {
 	unsigned int linkCount;
 };
 
-int test() {
-	printf("%s", ("componentCount: " + std::to_string(board->componentCount) + "\n").c_str());
-	printf("%s", ("LinkCount: " + std::to_string(board->linkCount) + "\n").c_str());
-	printf("%s", ("Tick: " + std::to_string(board->getCurrentTick()) + "\n").c_str());
-
-	std::string linksString = std::string("Links:");
-	for (unsigned int i = 0; i < board->linkCount; i++) {
-		linksString += std::string(" ") + std::to_string(*board->getLinks()[i].powered);
-	}
-	printf("%s", (linksString + std::string("\n")).c_str());
-
-	std::string str = std::string("Components:");
-	for (unsigned int i = 0; i < board->componentCount; i++) {
-		str += std::string("\n [") + std::to_string(i) + std::string("]\n  Inputs: ");
-		for (unsigned int j = 0; j < board->getComponents()[i]->getInputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->getInputs()[j].getPowered());
-		}
-
-		str += std::string("\n  Outputs:");
-		for (unsigned int j = 0; j < board->getComponents()[i]->getOutputCount(); j++) {
-			str += std::string(" ") + std::to_string(board->getComponents()[i]->getOutputs()[j].getPowered());
-		}
-	}
-	printf("%s", (str + std::string("\n")).c_str());
-
-	return 0;
-}
+//int test() {
+//	printf("%s", ("componentCount: " + std::to_string(board->componentCount) + "\n").c_str());
+//	printf("%s", ("LinkCount: " + std::to_string(board->linkCount) + "\n").c_str());
+//	printf("%s", ("Tick: " + std::to_string(board->getCurrentTick()) + "\n").c_str());
+//
+//	std::string linksString = std::string("Links:");
+//	for (unsigned int i = 0; i < board->linkCount; i++) {
+//		linksString += std::string(" ") + std::to_string(*board->getLinks()[i]->poweredCurrent);
+//	}
+//	printf("%s", (linksString + std::string("\n")).c_str());
+//
+//	std::string str = std::string("Components:");
+//	for (unsigned int i = 0; i < board->componentCount; i++) {
+//		str += std::string("\n [") + std::to_string(i) + std::string("]\n  Inputs: ");
+//		for (unsigned int j = 0; j < board->getComponents()[i]->getInputCount(); j++) {
+//			str += std::string(" ") + std::to_string(board->getComponents()[i]->getInputs()[j]->poweredCurrent);
+//		}
+//
+//		str += std::string("\n  Outputs:");
+//		for (unsigned int j = 0; j < board->getComponents()[i]->getOutputCount(); j++) {
+//			str += std::string(" ") + std::to_string(board->getComponents()[i]->getOutputs()[j].getPowered());
+//		}
+//	}
+//	printf("%s", (str + std::string("\n")).c_str());
+//
+//	return 0;
+//}
 
 int start() {
 	board->start();
@@ -114,7 +114,7 @@ int initComponent(unsigned int index, unsigned int type, uintptr_t inputsPtr, ui
 		componentOutputs[j] = &links[(unsigned int)outputs[j]];
 	}
 
-	if(type >= 200 && type < 300) {
+	if (type >= 200 && type < 300) {
 		components[index] = new UserInput(board, componentOutputs, outputCount);
 	} else {
 		switch (type)
@@ -189,11 +189,11 @@ uintptr_t getComponents() {
 		Component* component = board->getComponents()[i];
 		
 		for (int j = 0; j < component->getInputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->getInputs()[j].getPowered();
+			states[stateIndex++] = (uint8_t)*component->getInputs()[j]->poweredCurrent;
 		}
 
 		for (int j = 0; j < component->getOutputCount(); j++) {
-			states[stateIndex++] = (uint8_t)component->getOutputs()[j].getPowered();
+			states[stateIndex++] = (uint8_t)*component->getOutputs()[j]->poweredCurrent;
 		}
 	}
 
@@ -215,7 +215,7 @@ int destroy() {
 
 EMSCRIPTEN_BINDINGS(module)
 {
-	emscripten::function("test", &test);
+	//emscripten::function("test", &test);
 	emscripten::function("initBoard", &initBoard);
 	emscripten::function("initLinks", &initLinks);
 	emscripten::function("initComponents", &initComponents);

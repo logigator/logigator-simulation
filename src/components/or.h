@@ -1,24 +1,27 @@
 #pragma once
 #include "component.h"
-#include "output.h"
-#include "input.h"
 #include "link.h"
 
 class OR :
 	public Component
 {
 public:
-	OR(Board* board, Input* inputs, Output* outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 	OR(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
 	void compute() override {
+		if (outputs[0]->poweredNext)
+			return;
+#pragma optimize( "", off )
+		bool isOn = false;
 		for (unsigned int i = 0; i < inputCount; i++) {
-			if (inputs[i].getPowered() == true) {
-				outputs[0].setPowered(true);
-				return;
+			if (*inputs[0]->poweredCurrent) {
+				isOn = true;
+				break;
 			}
 		}
-		outputs[0].setPowered(false);
+		if (isOn)
+			*outputs[0]->poweredNext = true;
+#pragma optimize( "", on )
 	}
 };
 
