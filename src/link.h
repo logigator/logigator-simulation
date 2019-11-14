@@ -7,15 +7,47 @@ class Board;
 class Link
 {
 public:
-	Link();
-	Link(Board* board);
-	Link(Board* board, Input** inputs, Output** outputs, int inputCount, int outputCount);
-	~Link();
-	bool* powered;
+	Board* board;
 	Input** inputs;
 	Output** outputs;
-	Board* board;
-	int inputCount;
-	int outputCount;
+	unsigned int inputCount;
+	unsigned int outputCount;
+	bool* powered;
+
+	Link() :
+		board(nullptr),
+		inputs(nullptr),
+		outputs(nullptr),
+		inputCount(0),
+		outputCount(0),
+		powered(nullptr)
+	{
+	}
+
+	explicit Link(Board* board) :
+		board(board),
+		inputs(nullptr),
+		outputs(nullptr),
+		inputCount(0),
+		outputCount(0),
+		powered(nullptr)
+	{
+	}
+
+	Link(Board* board, Input** inputs, Output** outputs, const unsigned int inputCount, const unsigned int outputCount) :
+		board(board),
+		inputs(inputs),
+		outputs(outputs),
+		inputCount(inputCount),
+		outputCount(outputCount),
+		powered(nullptr)
+	{
+	}
+
+	~Link()
+	{
+		delete[] inputs;
+		delete[] outputs;
+	}
 };
 

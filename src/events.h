@@ -12,14 +12,14 @@ namespace Events
 	class Emitter
 	{
 	public:
-		virtual ~Emitter() {}
+		virtual ~Emitter() = default;
 	};
 
 	// Base class for arguments.
 	class EventArgs
 	{
 	public:
-		virtual ~EventArgs() {}
+		virtual ~EventArgs() = default;
 	};
 
 	template <typename TEventArgs = EventArgs>
@@ -27,8 +27,7 @@ namespace Events
 	{
 	public:
 		template <typename F>
-		EventHandler(const F& f) : std::function<void(Emitter*, TEventArgs&)>(f) {}
-	public:
+		explicit EventHandler(const F& f) : std::function<void(Emitter*, TEventArgs&)>(f) {}
 		void operator ()(Emitter* emitter, TEventArgs& args) { return std::function<void(Emitter*, TEventArgs&)>::operator()(emitter, args); }
 	};
 

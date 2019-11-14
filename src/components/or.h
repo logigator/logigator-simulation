@@ -8,10 +8,10 @@ class OR :
 	public Component
 {
 public:
-	OR(Board* board, Input* inputs, Output* outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
-	OR(Board* board, Link** inputs, Link** outputs, unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	OR(Board* board, Input* inputs, Output* outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	OR(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
-	void compute() {
+	void compute() override {
 		for (unsigned int i = 0; i < inputCount; i++) {
 			if (inputs[i].getPowered() == true) {
 				outputs[0].setPowered(true);

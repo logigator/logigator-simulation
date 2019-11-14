@@ -9,15 +9,16 @@ class UserInput :
 	public Component
 {
 public:
-	UserInput(Board* board, Link** outputs, unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
-	UserInput(Board* board, Output* outputs, unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
+	UserInput(Board* board, Link** outputs, const unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
+	UserInput(Board* board, Output* outputs, const unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
 
 	enum InputEvent { Cont, Pulse, Max };
-	void compute() {
+	
+	void compute() override {
 
 	}
 
-	void triggerUserInput(bool* state, InputEvent inputEvent) {
+	void triggerUserInput(bool* state, const InputEvent inputEvent) {
 		for (unsigned int i = 0; i < outputCount; i++) {
 			this->outputs[i].setPowered(state[i]);
 		}

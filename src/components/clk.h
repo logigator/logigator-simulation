@@ -17,7 +17,7 @@ public:
         subscribed = true;
 	}
 
-	CLK(Board* board, Input* inputs, Output* outputs, int speed) : Component(board, inputs, outputs, 1, 1) {
+	CLK(Board* board, Input* inputs, Output* outputs, const int speed) : Component(board, inputs, outputs, 1, 1) {
 		this->speed = speed;
 		board->tickEvent += tickEvent;
         subscribed = true;
@@ -28,7 +28,7 @@ public:
         subscribed = true;
 	}
 
-	CLK(Board* board, Link** inputs, Link** outputs, int speed) : Component(board, inputs, outputs, 1, 1) {
+	CLK(Board* board, Link** inputs, Link** outputs, const int speed) : Component(board, inputs, outputs, 1, 1) {
 		this->speed = speed;
 		board->tickEvent += tickEvent;
         subscribed = true;
@@ -38,7 +38,7 @@ public:
 		delete tickEvent;
 	}
 
-	void compute() {
+	void compute() override {
 		outputChange();
 	}
 private:
