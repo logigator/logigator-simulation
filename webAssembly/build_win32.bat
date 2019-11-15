@@ -7,7 +7,7 @@ IF NOT EXIST webAssembly\emscripten\ (
 @CALL webAssembly\emscripten\emsdk activate latest
 @CALL webAssembly\emscripten\emsdk_env.bat --build=Release || exit /b 1
 
-em++ -O0 --bind ^
+em++ -O3 --bind ^
  -std=c++11 ^
  -s WASM=1 ^
  -s ALLOW_MEMORY_GROWTH=1 ^
