@@ -16,6 +16,7 @@ public:
 	void init(Component** components, Link* links, unsigned int componentCount, unsigned int linkCount);
 	void init(Component** components, Link* links, unsigned int componentCount, unsigned int linkCount, unsigned int threadCount);
 	unsigned int getNextComponentIndex();
+	unsigned int getNextLinkIndex();
 	bool* readBuffer = nullptr;
 	bool* writeBuffer = nullptr;
 	bool* wipeBuffer = nullptr;
@@ -52,6 +53,7 @@ private:
 	std::chrono::high_resolution_clock::time_point started;
 	unsigned long long int lastCaptureTick = 0;
 	unsigned int componentIndex = 0;
+	unsigned int linkIndex = 0;
 	unsigned long long cyclesLeft = 0;
 	unsigned long long timeout = 0;
 };

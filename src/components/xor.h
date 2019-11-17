@@ -10,14 +10,14 @@ public:
 
 #pragma optimize( "", off )
 	void compute() override {
-		if (*outputs[0]->poweredNext)
-			return;
+		//if (*inputs[0]->poweredNext)
+		//	return;
 		unsigned int c = 0;
 		for (unsigned int i = 0; i < inputCount; i++) {
 			c += *inputs[i]->poweredCurrent;
 		}
 		if (c % 2)
-			*outputs[0]->poweredNext = true;
+			outputs[0]->setPowered(true);
 	}
 #pragma optimize( "", on )
 };

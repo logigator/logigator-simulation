@@ -50,6 +50,24 @@ protected:
 		inputCount(inputCount),
 		outputCount(outputCount)
 	{
+		for (unsigned int i = 0; i < outputCount; i++) {
+			Component** newComponents = new Component*[outputs[i]->inputCount + 1u];
+			std::memcpy(newComponents, outputs[i]->inputs, outputs[i]->inputCount * sizeof(Component*));
+			newComponents[outputs[i]->inputCount] = this;
+			delete[] outputs[i]->inputs;
+			outputs[i]->inputs = newComponents;
+			outputs[i]->inputCount++;
+		}
+
+		for (unsigned int i = 0; i < inputCount; i++) {
+			Component** newComponents = new Component*[inputs[i]->outputCount + 1u];
+			std::memcpy(newComponents, inputs[i]->outputs, inputs[i]->outputCount * sizeof(Component*));
+			newComponents[inputs[i]->outputCount] = this;
+			delete[] inputs[i]->outputs;
+			inputs[i]->outputs = newComponents;
+			inputs[i]->outputCount++;
+		}
+
 		componentIndex = board->getNextComponentIndex();
 	}
 };

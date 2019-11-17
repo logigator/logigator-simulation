@@ -10,8 +10,8 @@ public:
 
 #pragma optimize( "", off )
 	void compute() override {
-		if (*outputs[0]->poweredNext)
-			return;
+		//if (*inputs[0]->poweredNext)
+		//	return;
 		bool isOn = false;
 		for (unsigned int i = 0; i < inputCount; i++) {
 			if (*inputs[0]->poweredCurrent) {
@@ -20,7 +20,7 @@ public:
 			}
 		}
 		if (isOn)
-			*outputs[0]->poweredNext = true;
+			outputs[0]->setPowered(true);
 	}
 #pragma optimize( "", on )
 };

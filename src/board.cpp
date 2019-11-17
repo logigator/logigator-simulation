@@ -73,11 +73,11 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 		*links[i].poweredNext = this->linkDefaults[i];
 	}
 
-	if (componentCount > 0) {
-		buffer1 = new bool[componentCount] { false };
-		buffer2 = new bool[componentCount] { false };
-		buffer3 = new bool[componentCount] { false };
-		std::fill_n(buffer1, componentCount, 1);
+	if (linkCount > 0) {
+		buffer1 = new bool[linkCount] { false };
+		buffer2 = new bool[linkCount] { false };
+		buffer3 = new bool[linkCount] { false };
+		std::fill_n(buffer1, linkCount, 1);
 	}
 	else {
 		buffer1 = new bool[0];
@@ -96,20 +96,20 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 #else
 
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
+void Board::init(Component** inputs, Link* links, const unsigned int inputCount, const unsigned int linkCount)
 {
-	Board::init(components, links, componentCount, linkCount, 1);
+	Board::init(inputs, links, inputCount, linkCount, 1);
 }
 
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount, const unsigned int threadCount)
+void Board::init(Component** inputs, Link* links, const unsigned int inputCount, const unsigned int linkCount, const unsigned int threadCount)
 {
 	if (currentState != Board::Uninitialized)
 		return;
 
-	this->components = components;
+	this->inputs = inputs;
 	this->links = links;
 	this->threadCount = threadCount;
-	this->componentCount = componentCount;
+	this->inputCount = inputCount;
 	this->linkCount = linkCount;
 
 	if (linkCount > 0)
@@ -121,11 +121,11 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 		links[i].powered = &this->linkStates[i];
 	}
 
-	if (componentCount > 0) {
-		buffer1 = new bool[componentCount] { false };
-		buffer2 = new bool[componentCount] { false };
-		buffer3 = new bool[componentCount] { false };
-		std::fill_n(buffer1, componentCount, 1);
+	if (inputCount > 0) {
+		buffer1 = new bool[inputCount] { false };
+		buffer2 = new bool[inputCount] { false };
+		buffer3 = new bool[inputCount] { false };
+		std::fill_n(buffer1, inputCount, 1);
 	}
 	else {
 		buffer1 = new bool[0];
@@ -178,6 +178,11 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 unsigned int Board::getNextComponentIndex()
 {
 	return componentIndex++;
+}
+
+unsigned int Board::getNextLinkIndex()
+{
+	return linkIndex++;
 }
 
 unsigned int Board::getThreadCount() const
@@ -242,32 +247,27 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 	this->started = std::chrono::high_resolution_clock::now();
 
 	while (true) {
-		for (unsigned int i = 0; i < componentCount; i++) {
+		for (unsigned int i = 0; i < linkCount; i++) {
 			if (readBuffer[i]) {
-				components[i]->compute();
-				writeBuffer[i] = true;
+				for (unsigned int j = 0; j < links[i].outputCount; j++) {
+					links[i].outputs[j]->compute();
+				}
 			}
 			wipeBuffer[i] = false;
 		}
 
 		for (unsigned int i = 0; i < linkCount; i++) {
-			//bool rot = false;
-			//for (unsigned int j = 0; j < links[i].outputCount; j++) {
-			//	if (readBuffer[links[i].outputs[j]->componentIndex]) {
-			//		rot = true;
-			//		break;
-			//	}
-			//}
-			//if (rot) {
+			if (writeBuffer[i] || readBuffer[i])
+			{
 				*links[i].poweredCurrent = *links[i].poweredNext;
 				*links[i].poweredNext = linkDefaults[i];
-			//}
+			}
 		}
 
 		/*for (unsigned int i = 0; i < linkCount; i++) {
-			for(unsigned int j = 0; j < links[i].outputCount; j++) {
-				if (readBuffer[links[i].outputs[j]->getComponent()->componentIndex]) {
-					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
+			for(unsigned int j = 0; j < links[i].inputCount; j++) {
+				if (readBuffer[links[i].inputs[j]->getComponent()->componentIndex]) {
+					*links[i].powered = std::any_of(links[i].inputs, links[i].inputs + links[i].inputCount, [](Output* x) { return x->getPowered(); });
 					break;
 				}
 			}
@@ -323,17 +323,17 @@ void Board::startInternal(const unsigned long long cyclesLeft, const unsigned lo
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned int i = id; i < componentCount; i += threadCount) {
+				for (unsigned int i = id; i < inputCount; i += threadCount) {
 					if (readBuffer[i])
-						components[i]->compute();
+						inputs[i]->compute();
 					wipeBuffer[i] = false;
 				}
 				barrier->wait();
 
 				for (unsigned int i = id; i < linkCount; i += threadCount) {
-					for (unsigned int j = 0; j < links[i].outputCount; j++) {
-						if (readBuffer[links[i].outputs[j]->getComponent()->componentIndex]) {
-							*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
+					for (unsigned int j = 0; j < links[i].inputCount; j++) {
+						if (readBuffer[links[i].inputs[j]->getComponent()->componentIndex]) {
+							*links[i].powered = std::any_of(links[i].inputs, links[i].inputs + links[i].inputCount, [](Output* x) { return x->getPowered(); });
 							break;
 						}
 					}

@@ -10,53 +10,59 @@ class Link
 public:
 	Board* board;
 	Component** inputs;
-	Component** outputs;
 	unsigned int inputCount;
+	Component** outputs;
 	unsigned int outputCount;
 	bool* poweredNext;
 	bool* poweredCurrent;
-	unsigned long long lastUpdateTick;
+	unsigned int linkIndex;
 
 	Link() :
 		board(nullptr),
 		inputs(nullptr),
-		outputs(nullptr),
 		inputCount(0),
+		outputs(nullptr),
 		outputCount(0),
 		poweredNext(nullptr),
 		poweredCurrent(nullptr),
-		lastUpdateTick(0)
+		linkIndex(0)
 	{
 	}
 
 	explicit Link(Board* board) :
 		board(board),
 		inputs(nullptr),
-		outputs(nullptr),
 		inputCount(0),
+		outputs(nullptr),
 		outputCount(0),
 		poweredNext(nullptr),
-		poweredCurrent(nullptr),
-		lastUpdateTick(board->getCurrentTick())
+		poweredCurrent(nullptr)
 	{
+		linkIndex = board->getNextLinkIndex();
 	}
 
 	Link(Board* board, Component** inputs, Component** outputs, const unsigned int inputCount, const unsigned int outputCount) :
 		board(board),
 		inputs(inputs),
-		outputs(outputs),
 		inputCount(inputCount),
+		outputs(outputs),
 		outputCount(outputCount),
 		poweredNext(nullptr),
-		poweredCurrent(nullptr),
-		lastUpdateTick(board->getCurrentTick())
+		poweredCurrent(nullptr)
 	{
+		linkIndex = board->getNextLinkIndex();
 	}
 
 	~Link()
 	{
 		delete[] inputs;
 		delete[] outputs;
+	}
+
+	void setPowered(const bool val) const
+	{
+		*poweredNext = val;
+		board->writeBuffer[linkIndex] = true;
 	}
 };
 

@@ -10,9 +10,9 @@ public:
 
 #pragma optimize( "", off )
 	void compute() override {
-		if (*outputs[0]->poweredNext || *inputs[0]->poweredCurrent)
+		if (/**inputs[0]->poweredNext || */*inputs[0]->poweredCurrent)
 			return;
-		*outputs[0]->poweredNext = true;
+		outputs[0]->setPowered(true);
 	}
 #pragma optimize( "", on )
 };

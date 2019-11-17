@@ -10,19 +10,19 @@ public:
 
 #pragma optimize( "", off )
 	void compute() override {
-		/*if (outputs[0]->poweredNext)
+		/*if (inputs[0]->poweredNext)
 			return;
 
-		if (outputs[0].getLink()->lastUpdateTick != this->board->getCurrentTick())
+		if (inputs[0].getLink()->lastUpdateTick != this->board->getCurrentTick())
 		{
 			for (unsigned int i = 0; i < inputCount; i++) {
 				if (!inputs[i].getPowered()) {
-					outputs[0].setPowered(false);
+					inputs[0].setPowered(false);
 					return;
 				}
 			}
-			outputs[0].setPowered(true);
-			outputs[0].getLink()->lastUpdateTick = this->board->getCurrentTick();
+			inputs[0].setPowered(true);
+			inputs[0].getLink()->lastUpdateTick = this->board->getCurrentTick();
 		}*/
 		if (*outputs[0]->poweredNext)
 			return;
@@ -31,7 +31,7 @@ public:
 				return;
 			}
 		}
-		*outputs[0]->poweredNext = true;
+		outputs[0]->setPowered(true);
 	}
 #pragma optimize( "", on )
 
@@ -46,14 +46,14 @@ class AND_2 :
 public:
 	AND_2(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 2) { }
 
+#pragma optimize( "", off )
 	void compute() override {
 		if (*outputs[0]->poweredNext)
 			return;
-#pragma optimize( "", off )
 		if (*inputs[0]->poweredCurrent && *inputs[1]->poweredCurrent)
-			*outputs[0]->poweredNext = true;
-#pragma optimize( "", on )
+			outputs[0]->setPowered(true);
 	}
+#pragma optimize( "", on )
 private:
 };
 
@@ -63,14 +63,14 @@ class AND_3 :
 public:
 	AND_3(Board* board, Link** inputs, Link** outputs) : AND(board, inputs, outputs, 3) { }
 
+#pragma optimize( "", off )
 	void compute() override {
 		if (*outputs[0]->poweredNext)
 			return;
-#pragma optimize( "", off )
 		if (*inputs[0]->poweredCurrent && *inputs[1]->poweredCurrent && *inputs[2]->poweredCurrent)
-			*outputs[0]->poweredNext = true;
-#pragma optimize( "", on )
+			outputs[0]->setPowered(true);
 	}
+#pragma optimize( "", on )
 private:
 };
 
