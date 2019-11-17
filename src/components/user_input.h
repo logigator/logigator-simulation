@@ -32,14 +32,14 @@ public:
 private:
 	bool subscribed = false;
 
+#pragma optimize( "", off )
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		for (unsigned int i = 0; i < this->outputCount; i++) {
-#pragma optimize( "", off )
 			if (!*this->outputs[0]->poweredNext)
 				*this->outputs[i]->poweredNext = true;
-#pragma optimize( "", on )
 		}
 		this->board->tickEvent -= this->tickEvent;
 		this->subscribed = false;
 	});
+#pragma optimize( "", on )
 };

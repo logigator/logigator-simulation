@@ -31,18 +31,18 @@ public:
 private:
 	bool subscribed = false;
 	int tickCount = 0;
+#pragma optimize( "", off )
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		this->tickCount++;
 
 		if (this->tickCount >= this->speed) {
-#pragma optimize( "", off )
 			if (!*this->outputs[0]->poweredNext && !*this->outputs[0]->poweredCurrent)
 				*this->outputs[0]->poweredNext = true;
-#pragma optimize( "", on )
 
 			this->tickCount = 0;
 		}
 	});
+#pragma optimize( "", on )
 	
 	void outputChange() {
 		if (*inputs[0]->poweredCurrent) {

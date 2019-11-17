@@ -8,6 +8,7 @@ class AND :
 public:
 	AND(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
+#pragma optimize( "", off )
 	void compute() override {
 		/*if (outputs[0]->poweredNext)
 			return;
@@ -25,15 +26,14 @@ public:
 		}*/
 		if (*outputs[0]->poweredNext)
 			return;
-#pragma optimize( "", off )
 		for (unsigned int i = 0; i < inputCount; i++) {
 			if (!*inputs[0]->poweredCurrent) {
 				return;
 			}
 		}
 		*outputs[0]->poweredNext = true;
-#pragma optimize( "", on )
 	}
+#pragma optimize( "", on )
 
 	static AND* generateOptimized(Board* board, Link** inputs, Link** outputs, unsigned int inputCount);
 private:

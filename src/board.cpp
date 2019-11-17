@@ -60,7 +60,7 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	if (linkCount > 0) {
 		this->linkStates = new bool[linkCount] { false };
 		linkStatesNext = new bool[linkCount] { false };
-		this->linkDefaults = new bool[componentCount] { false };
+		this->linkDefaults = new bool[linkCount] { false };
 	} else {
 		this->linkStates = new bool[0];
 		linkStatesNext = new bool[0];
@@ -251,17 +251,17 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 		}
 
 		for (unsigned int i = 0; i < linkCount; i++) {
-			bool rot = false;
-			for (unsigned int j = 0; j < links[i].outputCount; j++) {
-				if (readBuffer[links[i].outputs[j]->componentIndex]) {
-					rot = true;
-					break;
-				}
-			}
-			if (rot) {
+			//bool rot = false;
+			//for (unsigned int j = 0; j < links[i].outputCount; j++) {
+			//	if (readBuffer[links[i].outputs[j]->componentIndex]) {
+			//		rot = true;
+			//		break;
+			//	}
+			//}
+			//if (rot) {
 				*links[i].poweredCurrent = *links[i].poweredNext;
 				*links[i].poweredNext = linkDefaults[i];
-			}
+			//}
 		}
 
 		/*for (unsigned int i = 0; i < linkCount; i++) {
