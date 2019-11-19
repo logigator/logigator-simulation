@@ -32,13 +32,15 @@ public:
 private:
 	bool subscribed = false;
 
+#ifndef __EMSCRIPTEN__
 #pragma optimize( "", off )
+#endif
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		for (unsigned int i = 0; i < this->outputCount; i++) {
-			if (!*this->outputs[0]->poweredNext)
+			if (!*this->outputs[i]->poweredNext)
 			{
-				this->outputs[0]->setPowered(true);
-				this->outputs[0]->update();
+				this->outputs[i]->setPowered(true);
+				this->outputs[i]->update();
 			}
 		}
 		this->board->tickEvent -= this->tickEvent;

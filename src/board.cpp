@@ -253,17 +253,14 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 	this->started = std::chrono::high_resolution_clock::now();
 
 	while (true) {
-		std::string str = std::string("compUpdates");
 		for (unsigned int i = 0; i < linkCount; i++) {
 			if (readBuffer[i]) {
 				for (unsigned int j = 0; j < links[i].outputCount; j++) {
 					links[i].outputs[j]->compute();
-					str += std::string(" ") + std::to_string(links[i].outputs[j]->componentIndex);
 				}
 			}
 			wipeBuffer[i] = false;
 		}
-		printf("%s", (str + std::string("\n")).c_str());
 
 		for (unsigned int i = 0; i < linkCount; i++) {
 			if (writeBuffer[i])

@@ -66,7 +66,8 @@ public:
 
 	void update() const
 	{
-		board->writeBuffer[linkIndex] = true;
+		if (*poweredNext != *poweredCurrent)
+			board->writeBuffer[linkIndex] = true;
 	}
 };
 

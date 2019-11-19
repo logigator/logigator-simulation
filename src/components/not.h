@@ -9,15 +9,16 @@ class NOT :
 public:
 	NOT(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 1, 1) { }
 
+#ifndef __EMSCRIPTEN__
 #pragma optimize( "", off )
+#endif
 	void compute() override {
-		outputs[0]->update();
 		if (/**outputs[0]->poweredNext || */*inputs[0]->poweredCurrent) {
-			printf("%s", "not NICHT\n");
+			outputs[0]->update();
 			return;
 		}
 		outputs[0]->setPowered(true);
-		printf("%s", "notiges not macht an\n");
+		outputs[0]->update();
 	}
 #pragma optimize( "", on )
 };

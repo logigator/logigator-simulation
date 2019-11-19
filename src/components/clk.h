@@ -31,7 +31,9 @@ public:
 private:
 	bool subscribed = false;
 	int tickCount = 0;
+#ifndef __EMSCRIPTEN__
 #pragma optimize( "", off )
+#endif
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		this->tickCount++;
 
