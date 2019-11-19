@@ -36,8 +36,10 @@ private:
 		this->tickCount++;
 
 		if (this->tickCount >= this->speed) {
-			if (!*this->outputs[0]->poweredNext && !*this->outputs[0]->poweredCurrent)
+			if (!*this->outputs[0]->poweredNext && !*this->outputs[0]->poweredCurrent) {
 				this->outputs[0]->setPowered(true);
+				this->outputs[0]->update();
+			}
 
 			this->tickCount = 0;
 		}

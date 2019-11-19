@@ -7,7 +7,7 @@ fi
 bash webAssembly/emscripten/emsdk activate latest
 source ./webAssembly/emscripten/emsdk_env.sh || exit 1
 
-em++ -O3 --bind \
+em++ -O0 --bind \
  -std=c++11 \
  -s WASM=1 \
  -s ALLOW_MEMORY_GROWTH=1 \

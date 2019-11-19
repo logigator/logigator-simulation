@@ -62,6 +62,10 @@ public:
 	void setPowered(const bool val) const
 	{
 		*poweredNext = val;
+	}
+
+	void update() const
+	{
 		board->writeBuffer[linkIndex] = true;
 	}
 };

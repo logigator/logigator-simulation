@@ -26,6 +26,7 @@ public:
 		}*/
 		if (*outputs[0]->poweredNext)
 			return;
+		outputs[0]->update();
 		for (unsigned int i = 0; i < inputCount; i++) {
 			if (!*inputs[0]->poweredCurrent) {
 				return;

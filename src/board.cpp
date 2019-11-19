@@ -7,6 +7,8 @@
 #include "spinlock_barrier.h"
 #include "events.h"
 
+#include <string>
+
 #define __EMSCRIPTEN__
 
 Board::Board() = default;
@@ -54,6 +56,10 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	this->links = links;
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
+
+
+	this->compUpdates = new bool[componentCount] { false };
+
 
 	bool* linkStatesNext;
 
@@ -247,31 +253,25 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 	this->started = std::chrono::high_resolution_clock::now();
 
 	while (true) {
+		std::string str = std::string("compUpdates");
 		for (unsigned int i = 0; i < linkCount; i++) {
 			if (readBuffer[i]) {
 				for (unsigned int j = 0; j < links[i].outputCount; j++) {
 					links[i].outputs[j]->compute();
+					str += std::string(" ") + std::to_string(links[i].outputs[j]->componentIndex);
 				}
 			}
 			wipeBuffer[i] = false;
 		}
+		printf("%s", (str + std::string("\n")).c_str());
 
 		for (unsigned int i = 0; i < linkCount; i++) {
-			if (writeBuffer[i] || readBuffer[i])
+			if (writeBuffer[i])
 			{
 				*links[i].poweredCurrent = *links[i].poweredNext;
 				*links[i].poweredNext = linkDefaults[i];
 			}
 		}
-
-		/*for (unsigned int i = 0; i < linkCount; i++) {
-			for(unsigned int j = 0; j < links[i].inputCount; j++) {
-				if (readBuffer[links[i].inputs[j]->getComponent()->componentIndex]) {
-					*links[i].powered = std::any_of(links[i].inputs, links[i].inputs + links[i].inputCount, [](Output* x) { return x->getPowered(); });
-					break;
-				}
-			}
-		}*/
 
 		auto* readPointer(readBuffer);
 

@@ -10,10 +10,13 @@ public:
 
 #pragma optimize( "", off )
 	void compute() override {
-		//if (*inputs[0]->poweredNext)
-		//	return;
+		if (*outputs[0]->poweredNext)
+			return;
+		outputs[0]->update();
 		if (*inputs[0]->poweredCurrent)
+		{
 			outputs[0]->setPowered(true);
+		}
 	}
 #pragma optimize( "", on )
 };

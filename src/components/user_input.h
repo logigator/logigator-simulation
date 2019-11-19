@@ -36,7 +36,10 @@ private:
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		for (unsigned int i = 0; i < this->outputCount; i++) {
 			if (!*this->outputs[0]->poweredNext)
+			{
 				this->outputs[0]->setPowered(true);
+				this->outputs[0]->update();
+			}
 		}
 		this->board->tickEvent -= this->tickEvent;
 		this->subscribed = false;

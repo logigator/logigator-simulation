@@ -56,6 +56,13 @@ struct BoardStatus {
 //	return 0;
 //}
 
+
+//std::string str = std::string("");
+//for (unsigned int i = 0; i < linkCount; i++) {
+//	str += std::string(" ") + std::to_string(readBuffer[i]);
+//}
+//printf("%s", str.c_str());
+
 int start() {
 	board->start();
 	return 0;

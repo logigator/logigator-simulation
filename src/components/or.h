@@ -10,8 +10,9 @@ public:
 
 #pragma optimize( "", off )
 	void compute() override {
-		//if (*inputs[0]->poweredNext)
-		//	return;
+		if (*outputs[0]->poweredNext)
+			return;
+		outputs[0]->update();
 		bool isOn = false;
 		for (unsigned int i = 0; i < inputCount; i++) {
 			if (*inputs[0]->poweredCurrent) {

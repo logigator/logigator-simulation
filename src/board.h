@@ -36,6 +36,8 @@ public:
 	void start();
 	void startManual(unsigned long long cyclesLeft);
 	void startTimeout(unsigned int ms);
+
+	bool* compUpdates = nullptr;
 	
 private:
 	void startInternal(const unsigned long long cyclesLeft, const unsigned long long ns);
