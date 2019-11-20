@@ -15,6 +15,8 @@
 #include "or.h"
 #include "user_input.h"
 #include "xor.h"
+#include "half_addr.h"
+#include "full_addr.h"
 
 std::map<std::string, Board*> boards;
 
@@ -87,6 +89,10 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 			else if (!strcmp(componentType, "XOR"))
 				components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+			else if (!strcmp(componentType, "HALF_ADDER"))
+				components[i] = new HalfAddr(board, componentInputs, componentOutputs);
+			else if (!strcmp(componentType, "FULL_ADDER"))
+				components[i] = new FullAddr(board, componentInputs, componentOutputs);
 			else {
 				Nan::ThrowTypeError((std::string("Error: Component '") + std::string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
 				return;

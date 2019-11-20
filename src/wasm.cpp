@@ -12,6 +12,8 @@
 #include "or.h"
 #include "user_input.h"
 #include "xor.h"
+#include "half_addr.h"
+#include "full_addr.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -136,6 +138,12 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				break;
 			case 6:
 				components[index] = new CLK(board, componentInputs, componentOutputs, op1);
+				break;
+			case 10:
+				components[index] = new HalfAddr(board, componentInputs, componentOutputs);
+				break;
+			case 11:
+				components[index] = new FullAddr(board, componentInputs, componentOutputs);
 				break;
 			default:
 				return 1;

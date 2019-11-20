@@ -22,6 +22,8 @@
 		"src/components/and.h",
 		"src/components/clk.h",
 		"src/components/delay.h",
+		"src/components/half_addr.h",
+		"src/components/full_addr.h",
 		"src/components/not.h",
 		"src/components/or.h",
 		"src/components/user_input.h",

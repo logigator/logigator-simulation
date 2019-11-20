@@ -45,14 +45,13 @@ private:
 	bool subscribed = false;
 	int tickCount = 0;
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
-		tickCount++;
+	    if(outputs[0].getPowered()) {
+			outputs[0].setPowered(false);
+			return;
+	    }
 
-		if (tickCount >= speed) {
-			if (outputs[0].getPowered())
-				outputs[0].setPowered(false);
-			else
-				outputs[0].setPowered(true);
-
+		if (++tickCount >= speed) {
+			outputs[0].setPowered(true);
 			tickCount = 0;
 		}
 	});
@@ -62,6 +61,8 @@ private:
 			if (subscribed) {
 				board->tickEvent -= tickEvent;
 				subscribed = false;
+				if(outputs[0].getPowered())
+					outputs[0].setPowered(false);
 			}
 		}
 		else {
