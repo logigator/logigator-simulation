@@ -56,6 +56,7 @@ public:
 			return;
 		if (*inputs[0]->poweredCurrent && *inputs[1]->poweredCurrent)
 			outputs[0]->setPowered(true);
+		outputs[0]->update();
 	}
 #pragma optimize( "", on )
 private:
@@ -73,6 +74,7 @@ public:
 			return;
 		if (*inputs[0]->poweredCurrent && *inputs[1]->poweredCurrent && *inputs[2]->poweredCurrent)
 			outputs[0]->setPowered(true);
+		outputs[0]->update();
 	}
 #pragma optimize( "", on )
 private:

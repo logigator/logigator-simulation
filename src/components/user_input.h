@@ -15,9 +15,11 @@ public:
 
 	}
 
-	void triggerUserInput(bool* state, const InputEvent inputEvent) {
+	void triggerUserInput(const bool* state, const InputEvent inputEvent) {
 		for (unsigned int i = 0; i < outputCount; i++) {
-			*this->outputs[i]->poweredNext = state[i];
+			this->board->linkDefaults[this->componentIndex] = state[i];
+			this->outputs[i]->setPowered(state[i]);
+			this->outputs[i]->update();
 		}
 
 		if (inputEvent == InputEvent::Pulse && !subscribed) {
@@ -37,11 +39,8 @@ private:
 #endif
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 		for (unsigned int i = 0; i < this->outputCount; i++) {
-			if (!*this->outputs[i]->poweredNext)
-			{
-				this->outputs[i]->setPowered(true);
-				this->outputs[i]->update();
-			}
+			this->board->linkDefaults[this->componentIndex] = false;
+			this->outputs[i]->update();
 		}
 		this->board->tickEvent -= this->tickEvent;
 		this->subscribed = false;
