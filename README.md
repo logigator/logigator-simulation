@@ -13,7 +13,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 nvm install lts/*
 ```
-Furthermore, if you want to compile to WASM, you also need python2.
+Furthermore, python2 is required for compiling:
 ```shell
 apt install python2
 ```
@@ -91,9 +91,11 @@ import {BoardObject, logicsim} from "logicsim";
 }
 ```
 ## Usage (WebAssembly)
-Copy the .wasm and .js file to an appropriate location on your web server. Then, import the WASM module:
+Copy the .wasm and .js file to an appropriate location on your web server. Then, import the JS file and initialize WebAssembly:
+```HTML
+<script src="/path/to/this/file/logigator-simulation.js"></script>
+```
 ```javascript
-importScripts('/path/to/this/file/logigator-simulation.js');
 Module.onRuntimeInitialized = () => {
 	console.log('Yay, it worked!');
 };
@@ -143,7 +145,7 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 ### Functions
 | Function | Description |
 | --- | --- |
-| `Module.start();` | Starts the simulation indefinetly. (Keep in mind that this operation locks the current thread.) |
+| 1 | NOT |
 | `Module.startTimeout(ms);` | Runs the simulation for x ms. |
 | `Module.startManual(ticks);` | Runs the simulation for x ticks. |
 | `Module.stop();` | Stops the simulation if running. (Probably useless in webAssembly as operations lock current thread anyway.) |
@@ -151,5 +153,8 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | `Module.getLinks();` | Returns pointer with the states of all links (1 byte per element, Array length equals number of links on board) |
 | `Module.getComponents();` | Return pointer with the states of all inputs and outputs of all components. Format: (component\[0\] inputs)(component\[0\] outputs)(component\[1\] inputs)(component\[1\] outputs)...(component\[n\] inputs)(component\[n\] outputs)  |
 | `Module.destroy();` | Destroys current board. This is required before being able to initialize a new board. |
+### Component Types
+| Type ID | Name |
+| --- | --- |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
