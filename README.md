@@ -163,6 +163,8 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | 4 | XOR | 2 - 2^32 | 1 | x | x |
 | 5 | DELAY | 1 | 1 | x | x |
 | 6 | CLOCK | 1 | 1 | Ticks between clock pulses | x |
+| 10 | Half Adder | 2 | 2 | x | x |
+| 11 | Full Adder | 3 | 2 | x | x |
 | 200 | User Input | 0 | 1 - 2^32 | x | x |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
