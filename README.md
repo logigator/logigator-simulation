@@ -47,7 +47,7 @@ You can also import it using typescript:
 import {BoardObject, logicsim} from "logicsim";
 ```
 ### Functions
-| Function | Decription |
+| Function | Description |
 | --- | --- |
 | `logicsim.newBoard(/*unique identifier for your board*/, /*object with the contents of the board, see below for an example*/);`  | Creates a new Board |
 | `logicsim.startBoard(/*identifier*/ [, /*amount of ticks the simulation will run, leave out for endless simulation*/ ]);` | Starts a Board |
@@ -141,7 +141,7 @@ to retrieve data from heap (e.g. current state of links from board):
 Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of last byte*/);
 ```
 ### Functions
-| Function | Decription |
+| Function | Description |
 | --- | --- |
 | `Module.start();` | Starts the simulation indefinetly. (Keep in mind that this operation locks the current thread.) |
 | `Module.startTimeout(ms);` | Runs the simulation for x ms. |
