@@ -145,7 +145,7 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 ### Functions
 | Function | Description |
 | --- | --- |
-| 1 | NOT |
+| `Module.start();` | Starts the simulation indefinetly. (Keep in mind that this operation locks the current thread.) |
 | `Module.startTimeout(ms);` | Runs the simulation for x ms. |
 | `Module.startManual(ticks);` | Runs the simulation for x ticks. |
 | `Module.stop();` | Stops the simulation if running. (Probably useless in webAssembly as operations lock current thread anyway.) |
