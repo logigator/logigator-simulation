@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/logigator/logigator-simulation.svg?branch=master)](https://travis-ci.org/logigator/logigator-simulation)
 [![Build Status](https://travis-ci.org/logigator/logigator-simulation.svg?branch=development)](https://travis-ci.org/logigator/logigator-simulation)
 
-Multi-Threaded Simulator for Logic Circuits as Node.JS Native C++ Module, alternatively compileable to WebAssembly.
+Multi-Threaded Simulator for Logic Circuits as Node.JS Native C++ Module, alternatively compilable to WebAssembly.
 ## Getting Started
 ### Prerequisites
 You need to have node and npm installed to use this module. We recommend installing it via [nvm](https://github.com/nvm-sh/nvm):
@@ -145,10 +145,10 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | --- | --- |
 | `Module.start();` | Starts the simulation indefinetly. (Keep in mind that this operation locks the current thread.) |
 | `Module.startTimeout(ms);` | Runs the simulation for x ms. |
-| `Module.stop();` | Stops the simulation if running. (probably useless in webassembly as operations lock current thread anyway.) |
+| `Module.stop();` | Stops the simulation if running. (Probably useless in webAssembly as operations lock current thread anyway.) |
 | `Module.getStatus();` | Returns object with data for current state of the simulation |
 | `Module.getLinks();` | Returns pointer with the states of all links (1 byte per element, Array length equals number of links on board) |
 | `Module.getComponents();` | Return pointer with the states of all inputs and outputs of all components. Format: (component\[0\] inputs)(component\[0\] outputs)(component\[1\] inputs)(component\[1\] outputs)...(component\[n\] inputs)(component\[n\] outputs)  |
-| `Module.destroy();` | Destroys current board. This is required before beeing able to initialize a new board. |
+| `Module.destroy();` | Destroys current board. This is required before being able to initialize a new board. |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
