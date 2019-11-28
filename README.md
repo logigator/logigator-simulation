@@ -21,7 +21,7 @@ apt install python2
 Download the contents of the repository, open the command line in that directory and install it using ```npm install```.
 #### Linux / Unix
 ```shell
-git clone 'https://github.com/yEinFallsLos/LogicSim.git' && cd ./LogicSim && npm install
+git clone 'http://github.com/logigator/logigator-simulation.git' && cd ./logigator-simulation && npm install
 ```
 alternatively, you can install it using npm:
 ```shell
@@ -152,9 +152,17 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | `Module.getStatus();` | Returns object with data for current state of the simulation |
 | `Module.getLinks();` | Returns pointer with the states of all links (1 byte per element, Array length equals number of links on board) |
 | `Module.getComponents();` | Return pointer with the states of all inputs and outputs of all components. Format: (component\[0\] inputs)(component\[0\] outputs)(component\[1\] inputs)(component\[1\] outputs)...(component\[n\] inputs)(component\[n\] outputs)  |
+| `Module.triggerInput(/*index of component*/, /*0 = set, 1 = pulse*/, /*pointer to array of states of components*/);` | Triggers a user input |
 | `Module.destroy();` | Destroys current board. This is required before being able to initialize a new board. |
 ### Component Types
-| Type ID | Name |
-| --- | --- |
+| Type ID | Name | Inputs | Outputs | Op1 | Op2 |
+| --- | --- | --- | --- | --- | --- |
+| 1 | NOT | 1 | 1 | x | x |
+| 2 | AND | 2 - 2^32 | 1 | x | x |
+| 3 | OR | 2 - 2^32 | 1 | x | x |
+| 4 | XOR | 2 - 2^32 | 1 | x | x |
+| 5 | DELAY | 1 | 1 | x | x |
+| 6 | CLOCK | 1 | 1 | Ticks between clock pulses | x |
+| 200 | User Input | 0 | 1 - 2^32 | x | x |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
