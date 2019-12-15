@@ -141,9 +141,9 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 
 	if (args.Length() > 1)
-		boards[identifier]->startManual(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust());
+		boards[identifier]->start(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust(), INT64_MAX);
 	else
-		boards[identifier]->start();
+		boards[identifier]->start(INT64_MAX, INT64_MAX);
 }
 
 void stop(const Nan::FunctionCallbackInfo<v8::Value>& args) {

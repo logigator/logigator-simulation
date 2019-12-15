@@ -58,18 +58,8 @@ int test() {
 	return 0;
 }
 
-int start() {
-	board->start();
-	return 0;
-}
-
-int startManual(unsigned long ticks) {
-	board->startManual(ticks);
-	return 0;
-}
-
-int startTimeout(unsigned int ms) {
-	board->startTimeout(ms);
+int start(double ticks, unsigned long ms) {
+	board->start((unsigned long long)ticks, ms);
 	return 0;
 }
 
@@ -231,8 +221,6 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("triggerInput", &triggerInput, emscripten::allow_raw_pointers());
 
 	emscripten::function("start", &start);
-	emscripten::function("startTimeout", &startTimeout);
-	emscripten::function("startManual", &startManual);
 	emscripten::function("stop", &stop);
 
 	emscripten::function("getStatus", &getStatus);
