@@ -13,7 +13,7 @@ public:
 
 	void compute() override {
 		outputs[0].setPowered(inputs[0].getPowered() ^ inputs[1].getPowered() ^ inputs[2].getPowered());
-		outputs[1].setPowered(inputs[0].getPowered() && inputs[1].getPowered() || inputs[0].getPowered() ^ inputs[1].getPowered() && inputs[2].getPowered());
+		outputs[1].setPowered((inputs[0].getPowered() && inputs[1].getPowered()) || (inputs[0].getPowered() ^ inputs[1].getPowered() && inputs[2].getPowered()));
 	}
 };
 
