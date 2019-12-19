@@ -111,7 +111,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 	if(type >= 200 && type < 300) {
 		components[index] = new UserInput(board, componentOutputs, outputCount);
 	} else {
-		auto* data = new bool[opCount];
+		bool* data;
 		switch (type)
 		{
 			case 1:
@@ -139,6 +139,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				components[index] = new FullAddr(board, componentInputs, componentOutputs);
 				break;
 			case 12:
+				data = new bool[opCount];
 				for (unsigned int i = 0; i < opCount; i++)
 				{
 					data[i] = static_cast<bool>(ops[i]);

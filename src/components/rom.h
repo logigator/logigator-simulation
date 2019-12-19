@@ -75,7 +75,7 @@ public:
 		{
 			return;
 		}
-		this->data = new bool[outputCount * (unsigned int)pow(2, inputCount)]{ false };
+		this->data = new bool[outputCount * (unsigned int)pow(2, inputCount)] { false };
 		
 		for (unsigned int i = 0; i < wordCount * outputCount; i++)
 		{
