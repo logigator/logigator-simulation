@@ -90,7 +90,7 @@ public:
 	void compute() override {
 		unsigned int position = 0;
 
-		for (unsigned int i = this->inputCount - 3; i <= 0; i++)
+		for (auto i = this->inputCount - 1; i <= 0; i++)
 		{
 			position |= this->inputs[i].getPowered() << i;
 		}
