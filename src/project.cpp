@@ -15,6 +15,9 @@
 #include "or.h"
 #include "user_input.h"
 #include "xor.h"
+#include "half_addr.h"
+#include "full_addr.h"
+#include "rom.h"
 
 std::map<std::string, Board*> boards;
 
@@ -87,6 +90,20 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 			else if (!strcmp(componentType, "XOR"))
 				components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+			else if (!strcmp(componentType, "HALF_ADDER"))
+				components[i] = new HalfAddr(board, componentInputs, componentOutputs);
+			else if (!strcmp(componentType, "FULL_ADDER"))
+				components[i] = new FullAddr(board, componentInputs, componentOutputs);
+			else if (!strcmp(componentType, "ROM")) {
+				const auto v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
+				auto* data = new bool[v8Data->Length()];
+				for (unsigned int j = 0; j < v8Data->Length(); j++)
+				{
+					data[j] = Nan::To<bool>(Nan::Get(v8Components, i).ToLocalChecked()).FromJust();
+				}
+				components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
+				delete[] data;
+			}
 			else {
 				Nan::ThrowTypeError((std::string("Error: Component '") + std::string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
 				return;
@@ -135,9 +152,9 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 
 	if (args.Length() > 1)
-		boards[identifier]->startManual(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust());
+		boards[identifier]->start(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust(), INT64_MAX);
 	else
-		boards[identifier]->start();
+		boards[identifier]->start(INT64_MAX, INT64_MAX);
 }
 
 void stop(const Nan::FunctionCallbackInfo<v8::Value>& args) {

@@ -31,12 +31,9 @@ public:
 	unsigned long long currentSpeed = 0;
 	Events::Event<> tickEvent;
 	void stop();
-	void start();
-	void startManual(unsigned long long cyclesLeft);
-	void startTimeout(unsigned int ms);
+	void start(unsigned long long cyclesLeft, unsigned long ms);
 	
 private:
-	void startInternal(unsigned long long cyclesLeft, unsigned long long ms);
 	bool* buffer1 = nullptr;
 	bool* buffer2 = nullptr;
 	bool* buffer3 = nullptr;

@@ -206,30 +206,23 @@ void Board::stop()
 	}
 }
 
-void Board::start()
-{
-	Board::startInternal(UINT64_MAX, UINT64_MAX);
-}
-
-void Board::startManual(const unsigned long long cyclesLeft)
-{
-	Board::startInternal(cyclesLeft, UINT64_MAX);
-}
-
-void Board::startTimeout(const unsigned int ms)
-{
-	Board::startInternal(UINT64_MAX, (unsigned long long)ms * 10e5);
-}
-
 #ifdef __EMSCRIPTEN__
 
-void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
+void Board::start(unsigned long long cyclesLeft, unsigned long ms)
 {
-	if (currentState != Board::Stopped)
+	if (this->currentState != Board::Stopped)
 		return;
 
-	currentState = Board::Running;
+	this->currentState = Board::Running;
 	this->started = std::chrono::high_resolution_clock::now();
+	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
+	this->cyclesLeft = cyclesLeft;
+
+	if (this->cyclesLeft <= 0)
+	{
+		currentState = Board::Stopped;
+		return;
+	}
 
 	while (true) {
 		for (unsigned int i = 0; i < componentCount; i++) {
@@ -253,7 +246,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
 
-		if ((unsigned long long)(timestamp - started).count() > ns) {
+		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -265,7 +258,7 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 			lastCaptureTick = tick;
 		}
 
-		if (!--cyclesLeft || currentState == Board::Stopping) {
+		if (!--this->cyclesLeft || currentState == Board::Stopping) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -274,13 +267,19 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 
 #else
 
-void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
+void Board::start(const unsigned long long cyclesLeft, const unsigned long ms)
 {
 	if (currentState != Board::Stopped)
 		return;
 
 	this->cyclesLeft = cyclesLeft;
-	this->timeout = ns;
+	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
+
+	if (this->cyclesLeft <= 0)
+	{
+		currentState = Board::Stopped;
+		return;
+	}
 
 	for (unsigned int i = 0; i < threadCount; i++) {
 		if (threads[i] != nullptr)
