@@ -14,6 +14,7 @@
 #include "xor.h"
 #include "half_addr.h"
 #include "full_addr.h"
+#include "rom.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -58,18 +59,8 @@ int test() {
 	return 0;
 }
 
-int start() {
-	board->start();
-	return 0;
-}
-
-int startManual(unsigned long ticks) {
-	board->startManual(ticks);
-	return 0;
-}
-
-int startTimeout(unsigned int ms) {
-	board->startTimeout(ms);
+int start(double ticks, unsigned long ms) {
+	board->start((unsigned long long)ticks, ms);
 	return 0;
 }
 
@@ -100,10 +91,11 @@ int initComponents(const unsigned int count) {
 	return 0;
 }
 
-int initComponent(const unsigned int index, const unsigned int type, const uintptr_t inputsPtr, const uintptr_t outputsPtr, const unsigned int inputCount, const unsigned int outputCount, const int op1, const int op2) {
+int initComponent(const unsigned int index, const unsigned int type, const uintptr_t inputsPtr, const uintptr_t outputsPtr, const unsigned int inputCount, const unsigned int outputCount, const unsigned int opCount, const uintptr_t opsPtr) {
 	auto* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
 	auto* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
-
+	auto* ops = reinterpret_cast<uint32_t*>(opsPtr);
+	
 	auto** componentInputs = new Link*[inputCount];
 
 	for (unsigned int j = 0; j < inputCount; j++) {
@@ -119,6 +111,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 	if(type >= 200 && type < 300) {
 		components[index] = new UserInput(board, componentOutputs, outputCount);
 	} else {
+		bool* data;
 		switch (type)
 		{
 			case 1:
@@ -137,13 +130,22 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				components[index] = new DELAY(board, componentInputs, componentOutputs);
 				break;
 			case 6:
-				components[index] = new CLK(board, componentInputs, componentOutputs, op1);
+				if (opCount > 0) components[index] = new CLK(board, componentInputs, componentOutputs, ops[0]);
 				break;
 			case 10:
 				components[index] = new HalfAddr(board, componentInputs, componentOutputs);
 				break;
 			case 11:
 				components[index] = new FullAddr(board, componentInputs, componentOutputs);
+				break;
+			case 12:
+				data = new bool[opCount];
+				for (unsigned int i = 0; i < opCount; i++)
+				{
+					data[i] = static_cast<bool>(ops[i]);
+				}
+				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
+				delete[] data;
 				break;
 			default:
 				return 1;
@@ -164,7 +166,7 @@ int triggerInput(unsigned int index, int event, uintptr_t state) {
 	const auto inputEvent = static_cast<UserInput::InputEvent>(event);
 	auto* userInput = (UserInput*)(board->getComponents()[index]);
 
-	userInput->triggerUserInput((bool*)reinterpret_cast<uint8_t*>(state), inputEvent);
+	userInput->triggerUserInput(reinterpret_cast<bool*>(state), inputEvent);
 	return 0;
 }
 
@@ -231,8 +233,6 @@ EMSCRIPTEN_BINDINGS(module)
 	emscripten::function("triggerInput", &triggerInput, emscripten::allow_raw_pointers());
 
 	emscripten::function("start", &start);
-	emscripten::function("startTimeout", &startTimeout);
-	emscripten::function("startManual", &startManual);
 	emscripten::function("stop", &stop);
 
 	emscripten::function("getStatus", &getStatus);

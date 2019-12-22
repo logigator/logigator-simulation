@@ -27,6 +27,7 @@
 		"src/components/not.h",
 		"src/components/or.h",
 		"src/components/user_input.h",
+		"src/components/rom.h",
 		"src/components/xor.h"
 	  ]
     }
