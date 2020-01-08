@@ -15,6 +15,9 @@
 #include "half_addr.h"
 #include "full_addr.h"
 #include "rom.h"
+#include "d_ff.h"
+#include "jk_ff.h"
+#include "sr_ff.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -146,6 +149,15 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				}
 				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
 				delete[] data;
+				break;
+			case 13:
+				components[index] = new D_FF(board, componentInputs, componentOutputs);
+				break;
+			case 14:
+				components[index] = new JK_FF(board, componentInputs, componentOutputs);
+				break;
+			case 15:
+				components[index] = new SR_FF(board, componentInputs, componentOutputs);
 				break;
 			default:
 				return 1;
