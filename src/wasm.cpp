@@ -114,7 +114,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 	if(type >= 200 && type < 300) {
 		components[index] = new UserInput(board, componentOutputs, outputCount);
 	} else {
-		bool* data;
+		unsigned char* data;
 		switch (type)
 		{
 			case 1:
@@ -142,12 +142,12 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				components[index] = new FullAddr(board, componentInputs, componentOutputs);
 				break;
 			case 12:
-				data = new bool[opCount];
-				for (unsigned int i = 0; i < opCount; i++)
+				data = new unsigned char[opCount - 2];
+				for (unsigned int i = 2; i < opCount; i++)
 				{
-					data[i] = static_cast<bool>(ops[i]);
+					data[i - 2] = static_cast<unsigned char>(ops[i]);
 				}
-				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
+				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount - 2, data);
 				delete[] data;
 				break;
 			case 13:
