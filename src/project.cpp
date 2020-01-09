@@ -96,10 +96,10 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				components[i] = new FullAddr(board, componentInputs, componentOutputs);
 			else if (!strcmp(componentType, "ROM")) {
 				const auto v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
-				auto* data = new bool[v8Data->Length()];
+				auto* data = new unsigned char[v8Data->Length()];
 				for (unsigned int j = 0; j < v8Data->Length(); j++)
 				{
-					data[j] = Nan::To<bool>(Nan::Get(v8Components, i).ToLocalChecked()).FromJust();
+					data[j] = (unsigned char)Nan::To<int>(Nan::Get(v8Components, i).ToLocalChecked()).FromJust();
 				}
 				components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
 				delete[] data;
