@@ -4,7 +4,6 @@
 #include "output.h"
 #include "input.h"
 #include "board.h"
-#include "events.h"
 #include "link.h"
 
 class ROM :
@@ -18,7 +17,7 @@ public:
 		const unsigned int outputCount)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / 8)] { 0 };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 	}
 
 	ROM(Board* board,
@@ -30,7 +29,7 @@ public:
 		const unsigned char* data)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / 8)] { 0 };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 
 		for (unsigned int i = 0; i < wordCount; i++)
 		{
@@ -45,7 +44,7 @@ public:
 		unsigned int outputCount)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / 8)] { 0 };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 	}
 
 	ROM(Board* board,
@@ -57,19 +56,12 @@ public:
 		const unsigned char* data)
 		: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / 8)] { 0 };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 		
 		for (unsigned int i = 0; i < wordCount; i++)
 		{
 			this->data[i] = data[i];
 		}
-
-		auto linksString = std::string("[");
-		for (auto i = 0; i < ceil(outputCount * pow(2, inputCount) / 8) - 1; i++) {
-			linksString += std::to_string(this->data[i]) + std::string(", ");
-		}
-		linksString += std::to_string(this->data[(long)ceil(outputCount * pow(2, inputCount) / 8) - 1]);
-		printf("%s", (linksString + std::string("]\n")).c_str());
 	}
 
 	~ROM() {
@@ -86,7 +78,7 @@ public:
 		
 		for (unsigned int i = 0; i < this->outputCount; i++)
 		{
-			this->outputs[i].setPowered((unsigned char)(data[(position + i) / 8] << (7 - (position + i) % 8)) >> 7);
+			this->outputs[i].setPowered((unsigned char)(data[(position + i) / CHAR_BIT] << (CHAR_BIT - 1 - (position + i) % 8)) >> (CHAR_BIT - 1));
 		}
 	}
 private:
