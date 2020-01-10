@@ -50,7 +50,7 @@ import {BoardObject, logicsim} from "logicsim";
 | Function | Description |
 | --- | --- |
 | `logicsim.init(board);` | Creates a new Board. A sample board object can be found below. |
-| `logicsim.start(ticks, ms);` | Runs the simulation until either the ticks were simulated or the simulation time was reached. |
+| `logicsim.start(threads, ticks, ms);` | Runs the simulation until either the ticks were simulated or the simulation time was reached. |
 | `logicsim.stop();` | Stops the simulation if running. |
 | `logicsim.getStatus();` | Gets the current Status of a Board, like simulated ticks, current execution state or current simulation speed |
 | `logicsim.getLinks();` | Gets states of all links |
@@ -61,10 +61,9 @@ import {BoardObject, logicsim} from "logicsim";
 ```json
 {
   "links": 4,
-  "threads": 1,
   "components": [
   	{
-  		"type": "SWITCH",
+  		"type": 200,
   		"inputs": [
   		],
   		"outputs": [
@@ -72,7 +71,7 @@ import {BoardObject, logicsim} from "logicsim";
   		]
   	},
   	{
-  		"type": "XOR",
+  		"type": 4,
   		"inputs": [
   			0, 1
   		],
@@ -81,7 +80,7 @@ import {BoardObject, logicsim} from "logicsim";
   		]
   	},
   	{
-  		"type": "AND",
+  		"type": 2,
   		"inputs": [
   			0, 2
   		],
