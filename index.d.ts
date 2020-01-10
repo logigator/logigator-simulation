@@ -1,14 +1,13 @@
-declare type BoardObject = {
+export declare type Board = {
     links: number;
-    threads: number;
     components: {
-        type: Components;
+        type: ComponentType;
         inputs: number[];
         outputs: number[];
     }[];
 }
 
-declare type BoardStatus = {
+export declare type BoardStatus = {
     currentSpeed: number;
     currentState: number;
     threadCount: number;
@@ -17,24 +16,39 @@ declare type BoardStatus = {
     tick: number;
 }
 
-declare type BoardState = {
+export declare type BoardState = {
     components: boolean[][];
     links: boolean[];
 }
 
-declare type Components = 'XOR' | 'AND' | 'OR' | 'NOT' | 'INPUT' | 'DELAY' | 'CLK';
-declare enum InputEvent {
+export declare const enum ComponentType {
+    NOT = 1,
+    AND = 2,
+    OR = 3,
+    XOR = 4,
+    DELAY = 5,
+    CLK = 6,
+    HalfAdder = 10,
+    FullAdder = 11,
+    ROM = 12,
+    D_FF = 13,
+    JK_FF = 14,
+    SR_FF = 15,
+    UserInput = 200
+}
+
+export declare const enum InputEvent {
     Cont,
     Pulse
 }
 
-declare module logicsim {
-    function newBoard(id: string, boardObject: BoardObject): void;
-    function startBoard(id: string, ticksToRun?: number): void;
-    function stopBoard(id: string): void;
-    function getBoardStatus(id: string): BoardStatus;
-    function getBoard(id: string): BoardState;
-    function triggerInput(id: string, componentIndex: number, inputEvent: InputEvent, state: boolean[]): void;
+export declare module logicsim {
+    function init(board: Board): void;
+    function destroy(): void;
+    function start(threads?: number, ticks?: number, ms?: number): void;
+    function stop(): void;
+    function getStatus(): BoardStatus;
+    function getBoard(): BoardState;
+    function getLinks(): boolean[];
+    function triggerInput(componentIndex: number, inputEvent: InputEvent, state: boolean[]): void;
 }
-
-export {logicsim, BoardState, BoardStatus, BoardObject};

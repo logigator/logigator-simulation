@@ -39,11 +39,6 @@ Board::~Board()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount, const unsigned int threadCount)
-{
-	Board::init(components, links, componentCount, linkCount);
-}
-
 void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
 {
 	if (currentState != Board::Uninitialized)
@@ -87,11 +82,6 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 #else
 
 void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
-{
-	Board::init(components, links, componentCount, linkCount, 1);
-}
-
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount, const unsigned int threadCount)
 {
 	if (currentState != Board::Uninitialized)
 		return;
@@ -208,7 +198,7 @@ void Board::stop()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(unsigned long long cyclesLeft, unsigned long ms)
+void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount)
 {
 	if (this->currentState != Board::Stopped)
 		return;
@@ -218,7 +208,7 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms)
 	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
 	this->cyclesLeft = cyclesLeft;
 
-	if (this->cyclesLeft <= 0)
+	if (this->cyclesLeft <= 0 || this->timeout <= 0)
 	{
 		currentState = Board::Stopped;
 		return;
@@ -267,15 +257,17 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms)
 
 #else
 
-void Board::start(const unsigned long long cyclesLeft, const unsigned long ms)
+void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, const unsigned int threadCount)
 {
 	if (currentState != Board::Stopped)
 		return;
 
 	this->cyclesLeft = cyclesLeft;
 	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
+	this->threadCount = threadCount;
+	this->currentState = Board::Running;
 
-	if (this->cyclesLeft <= 0)
+	if (this->cyclesLeft <= 0 || this->timeout <= 0)
 	{
 		currentState = Board::Stopped;
 		return;
@@ -285,20 +277,19 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms)
 		if (threads[i] != nullptr)
 			delete threads[i];
 
-		currentState = Board::Running;
-		threads[i] = new std::thread([this](int id) {
+		threads[i] = new std::thread([this](const int id) {
 			while (true) {
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned int i = id; i < componentCount; i += threadCount) {
+				for (unsigned int i = id; i < componentCount; i += this->threadCount) {
 					if (readBuffer[i])
 						components[i]->compute();
 					wipeBuffer[i] = false;
 				}
 				barrier->wait();
 
-				for (unsigned int i = id; i < linkCount; i += threadCount) {
+				for (unsigned int i = id; i < linkCount; i += this->threadCount) {
 					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 				}
 				barrier->wait();

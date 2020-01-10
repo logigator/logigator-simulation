@@ -63,7 +63,7 @@ int test() {
 }
 
 int start(double ticks, unsigned long ms) {
-	board->start((unsigned long long)ticks, ms);
+	board->start((unsigned long long)ticks, ms, 1);
 	return 0;
 }
 
