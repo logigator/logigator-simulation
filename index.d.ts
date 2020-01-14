@@ -45,7 +45,7 @@ export declare const enum InputEvent {
 export declare module logicsim {
     function init(board: Board): void;
     function destroy(): void;
-    function start(threads?: number, ticks?: number, ms?: number): void;
+    function start(threads?: number, ticks?: number, ms?: number, synchronized?: boolean): void;
     function stop(): void;
     function getStatus(): BoardStatus;
     function getBoard(): BoardState;

@@ -151,8 +151,8 @@ void destroy(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() > 3) {
-		Nan::ThrowSyntaxError("Usage: startBoard({[number]threads, [number]ticks, [number]ms})");
+	if (args.Length() > 4) {
+		Nan::ThrowSyntaxError("Usage: startBoard({[number]threads, [number]ticks, [number]ms, [bool]synchronized})");
 		return;
 	}
 	if (components == nullptr || links == nullptr)
@@ -186,8 +186,15 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		}
 		timeout = Nan::To<int64_t>(args[2]).FromJust();
 	}
-
-	board->start(ticks, timeout, threadCount);
+	
+	if (args.Length() > 3 && args[3]->IsBoolean() && Nan::To<bool>(args[3]).FromJust())
+	{
+		board->start(ticks, timeout, threadCount, true);
+	}
+	else
+	{
+		board->start(ticks, timeout, threadCount);
+	}
 }
 
 void stop(const Nan::FunctionCallbackInfo<v8::Value>& args) {

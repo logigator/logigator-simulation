@@ -30,7 +30,7 @@ public:
 	unsigned long long currentSpeed = 0;
 	Events::Event<> tickEvent;
 	void stop();
-	void start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount);
+	void start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, bool synchronized = false);
 	
 private:
 	bool* buffer1 = nullptr;

@@ -198,7 +198,7 @@ void Board::stop()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount)
+void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, const bool synchronized)
 {
 	if (this->currentState != Board::Stopped)
 		return;
@@ -257,7 +257,7 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 
 #else
 
-void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, const unsigned int threadCount)
+void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, const unsigned int threadCount, const bool synchronized)
 {
 	if (currentState != Board::Stopped)
 		return;
@@ -295,6 +295,14 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 				barrier->wait();
 			}
 		}, i);
+	}
+
+	if (synchronized)
+	{
+		for (unsigned i = 0; i < threadCount; i++)
+		{
+			threads[i]->join();
+		}
 	}
 }
 
