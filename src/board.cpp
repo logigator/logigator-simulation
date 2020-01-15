@@ -132,16 +132,16 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
 
-		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
-			currentState = Board::Stopped;
-			return;
-		}
-
 		const auto diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
 			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
 			lastCapture = timestamp;
 			lastCaptureTick = tick;
+		}
+
+		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+			currentState = Board::Stopped;
+			return;
 		}
 
 		if (!--cyclesLeft || currentState == Board::Stopping) {
@@ -234,16 +234,16 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
 
-		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
-			currentState = Board::Stopped;
-			return;
-		}
-
 		const auto diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
 			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
 			lastCapture = timestamp;
 			lastCaptureTick = tick;
+		}
+
+		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+			currentState = Board::Stopped;
+			return;
 		}
 
 		if (!--this->cyclesLeft || currentState == Board::Stopping) {
@@ -260,6 +260,7 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 	if (currentState != Board::Stopped)
 		return;
 
+	this->started = std::chrono::high_resolution_clock::now();
 	this->cyclesLeft = cyclesLeft;
 	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
 	this->currentState = Board::Running;
