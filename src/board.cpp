@@ -39,11 +39,6 @@ Board::~Board()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount, const unsigned int threadCount)
-{
-	Board::init(components, links, componentCount, linkCount);
-}
-
 void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
 {
 	if (currentState != Board::Uninitialized)
@@ -88,17 +83,11 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
 {
-	Board::init(components, links, componentCount, linkCount, 1);
-}
-
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount, const unsigned int threadCount)
-{
 	if (currentState != Board::Uninitialized)
 		return;
 
 	this->components = components;
 	this->links = links;
-	this->threadCount = threadCount;
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
 
@@ -129,10 +118,9 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	
 	currentState = Board::Stopped;
 
-	threads = new std::thread*[threadCount] { nullptr };
 	lastCapture = std::chrono::high_resolution_clock::now();
 
-	barrier = new SpinlockBarrier(threadCount, [this]() {
+	barrier = new SpinlockBarrier(0, [this]() {
 		auto* readPointer(readBuffer);
 
 		readBuffer = writeBuffer;
@@ -144,16 +132,16 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
 
-		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
-			currentState = Board::Stopped;
-			return;
-		}
-
 		const auto diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
 			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
 			lastCapture = timestamp;
 			lastCaptureTick = tick;
+		}
+
+		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+			currentState = Board::Stopped;
+			return;
 		}
 
 		if (!--cyclesLeft || currentState == Board::Stopping) {
@@ -208,7 +196,7 @@ void Board::stop()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(unsigned long long cyclesLeft, unsigned long ms)
+void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, const bool synchronized)
 {
 	if (this->currentState != Board::Stopped)
 		return;
@@ -218,7 +206,7 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms)
 	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
 	this->cyclesLeft = cyclesLeft;
 
-	if (this->cyclesLeft <= 0)
+	if (this->cyclesLeft <= 0 || this->timeout <= 0)
 	{
 		currentState = Board::Stopped;
 		return;
@@ -246,16 +234,16 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms)
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
 
-		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
-			currentState = Board::Stopped;
-			return;
-		}
-
 		const auto diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
 			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
 			lastCapture = timestamp;
 			lastCaptureTick = tick;
+		}
+
+		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+			currentState = Board::Stopped;
+			return;
 		}
 
 		if (!--this->cyclesLeft || currentState == Board::Stopping) {
@@ -267,43 +255,59 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms)
 
 #else
 
-void Board::start(const unsigned long long cyclesLeft, const unsigned long ms)
+void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, const unsigned int threadCount, const bool synchronized)
 {
 	if (currentState != Board::Stopped)
 		return;
 
+	this->started = std::chrono::high_resolution_clock::now();
 	this->cyclesLeft = cyclesLeft;
 	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
+	this->currentState = Board::Running;
 
-	if (this->cyclesLeft <= 0)
+	if (this->cyclesLeft <= 0 || this->timeout <= 0)
 	{
 		currentState = Board::Stopped;
 		return;
 	}
 
-	for (unsigned int i = 0; i < threadCount; i++) {
+	for (unsigned int i = 0; i < this->threadCount; i++)
+	{
 		if (threads[i] != nullptr)
 			delete threads[i];
+	}
+	delete[] this->threads;
+	this->threads = new std::thread*[threadCount] { nullptr };
+	this->threadCount = threadCount;
+	this->barrier->setStageCount(threadCount);
 
-		currentState = Board::Running;
-		threads[i] = new std::thread([this](int id) {
+	for (unsigned int i = 0; i < threadCount; i++) {
+		threads[i] = new std::thread([this](const int id) {
 			while (true) {
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned int i = id; i < componentCount; i += threadCount) {
+				for (unsigned long i = id; i < componentCount; i += this->threadCount) {
 					if (readBuffer[i])
 						components[i]->compute();
 					wipeBuffer[i] = false;
 				}
 				barrier->wait();
 
-				for (unsigned int i = id; i < linkCount; i += threadCount) {
+				for (unsigned int i = id; i < linkCount; i += this->threadCount) {
 					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 				}
 				barrier->wait();
 			}
 		}, i);
+	}
+
+	if (synchronized)
+	{
+		for (unsigned i = 0; i < threadCount; i++)
+		{
+			threads[i]->join();
+		}
 	}
 }
 

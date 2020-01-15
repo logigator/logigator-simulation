@@ -22,7 +22,8 @@
   "files": [
     "src",
     "webAssembly/!(emscripten)",
-    "binding.gyp"
+    "binding.gyp",
+    "index.d.ts"
   ],
   "repository": {
     "type": "git",

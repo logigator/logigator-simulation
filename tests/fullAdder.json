@@ -11,12 +11,12 @@
 	"inputTriggers": [
 		0
 	],
+	"threads": 1,
 	"board": {
 		"links": 8,
-		"threads": 1,
 		"components": [
 			{
-				"type": "INPUT",
+				"type": 200,
 				"inputs": [
 				],
 				"outputs": [
@@ -24,7 +24,7 @@
 				]
 			},
 			{
-				"type": "XOR",
+				"type": 4,
 				"inputs": [
 					1, 2
 				],
@@ -33,7 +33,7 @@
 				]
 			},
 			{
-				"type": "AND",
+				"type": 2,
 				"inputs": [
 					1, 2
 				],
@@ -42,7 +42,7 @@
 				]
 			},
 			{
-				"type": "XOR",
+				"type": 4,
 				"inputs": [
 					0, 3
 				],
@@ -51,7 +51,7 @@
 				]
 			},
 			{
-				"type": "AND",
+				"type": 2,
 				"inputs": [
 					0, 3
 				],
@@ -60,7 +60,7 @@
 				]
 			},
 			{
-				"type": "OR",
+				"type": 3,
 				"inputs": [
 					4, 6
 				],

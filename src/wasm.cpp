@@ -63,7 +63,7 @@ int test() {
 }
 
 int start(double ticks, unsigned long ms) {
-	board->start((unsigned long long)ticks, ms);
+	board->start((unsigned long long)ticks, ms, 1);
 	return 0;
 }
 
@@ -142,12 +142,12 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				components[index] = new FullAddr(board, componentInputs, componentOutputs);
 				break;
 			case 12:
-				data = new unsigned char[opCount - 2];
-				for (unsigned int i = 2; i < opCount; i++)
+				data = new unsigned char[opCount];
+				for (unsigned int i = 0; i < opCount; i++)
 				{
-					data[i - 2] = static_cast<unsigned char>(ops[i]);
+					data[i] = static_cast<unsigned char>(ops[i]);
 				}
-				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount - 2, data);
+				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
 				delete[] data;
 				break;
 			case 13:
