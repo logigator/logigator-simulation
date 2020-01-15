@@ -14,7 +14,6 @@ public:
 	Board();
 	~Board();
 	void init(Component** components, Link* links, unsigned int componentCount, unsigned int linkCount);
-	void init(Component** components, Link* links, unsigned int componentCount, unsigned int linkCount, unsigned int threadCount);
 	unsigned int getNextComponentIndex();
 	bool* readBuffer = nullptr;
 	bool* writeBuffer = nullptr;
@@ -31,13 +30,13 @@ public:
 	unsigned long long currentSpeed = 0;
 	Events::Event<> tickEvent;
 	void stop();
-	void start(unsigned long long cyclesLeft, unsigned long ms);
+	void start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, bool synchronized = false);
 	
 private:
 	bool* buffer1 = nullptr;
 	bool* buffer2 = nullptr;
 	bool* buffer3 = nullptr;
-	unsigned int threadCount = 1;
+	unsigned int threadCount = 0;
 	Component** components = nullptr;
 	Link* links = nullptr;
 	State currentState = Board::Uninitialized;

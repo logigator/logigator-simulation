@@ -15,6 +15,9 @@
 #include "half_addr.h"
 #include "full_addr.h"
 #include "rom.h"
+#include "d_ff.h"
+#include "jk_ff.h"
+#include "sr_ff.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -60,7 +63,7 @@ int test() {
 }
 
 int start(double ticks, unsigned long ms) {
-	board->start((unsigned long long)ticks, ms);
+	board->start((unsigned long long)ticks, ms, 1);
 	return 0;
 }
 
@@ -111,7 +114,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 	if(type >= 200 && type < 300) {
 		components[index] = new UserInput(board, componentOutputs, outputCount);
 	} else {
-		bool* data;
+		unsigned char* data;
 		switch (type)
 		{
 			case 1:
@@ -139,13 +142,22 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 				components[index] = new FullAddr(board, componentInputs, componentOutputs);
 				break;
 			case 12:
-				data = new bool[opCount];
+				data = new unsigned char[opCount];
 				for (unsigned int i = 0; i < opCount; i++)
 				{
-					data[i] = static_cast<bool>(ops[i]);
+					data[i] = static_cast<unsigned char>(ops[i]);
 				}
 				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
 				delete[] data;
+				break;
+			case 13:
+				components[index] = new D_FF(board, componentInputs, componentOutputs);
+				break;
+			case 14:
+				components[index] = new JK_FF(board, componentInputs, componentOutputs);
+				break;
+			case 15:
+				components[index] = new SR_FF(board, componentInputs, componentOutputs);
 				break;
 			default:
 				return 1;

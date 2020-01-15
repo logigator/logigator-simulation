@@ -3,8 +3,8 @@ const logicsim = require('../index').logicsim;
 var components = [];
 
 components.push({
-    "type": "CLK",
-    "CLK_Speed": 1,
+    "type": 6,
+    "ops": [1],
     "inputs": [
         1
     ],
@@ -15,7 +15,7 @@ components.push({
 
 for (let i = 0; i < 10; i++) {
     components.push({
-        "type": "AND",
+        "type": 2,
         "inputs": [
             0, 1
         ],
@@ -25,17 +25,16 @@ for (let i = 0; i < 10; i++) {
     });
 }
 
-logicsim.newBoard("testBoard", {
-	"links" : 3,
-    "threads": 2,
+logicsim.init({
+    "links" : 3,
     "components": components
 });
-logicsim.startBoard("testBoard");
+logicsim.start(2);
 
 run();
 
 async function run() {
     await new Promise(resolve => setTimeout(resolve, 3000));
-    logicsim.stopBoard("testBoard");
-    console.log(logicsim.getBoardStatus("testBoard").currentSpeed);
+    logicsim.stop();
+    console.log(logicsim.getStatus().currentSpeed);
 }

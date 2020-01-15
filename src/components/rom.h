@@ -1,18 +1,15 @@
 #pragma once
-#include <math.h>
+#include <cmath>
 #include "component.h"
 #include "output.h"
 #include "input.h"
 #include "board.h"
-#include "events.h"
 #include "link.h"
 
 class ROM :
 	public Component
 {
 public:
-	int speed = 1;
-
 	ROM(Board* board,
 		Input* inputs,
 		Output* outputs,
@@ -20,11 +17,7 @@ public:
 		const unsigned int outputCount)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		if (inputCount <= 2 || outputCount <= 0)
-		{
-			return;
-		}
-		this->data = new bool[outputCount * (unsigned int)pow(2, inputCount - 2)] { false };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 	}
 
 	ROM(Board* board,
@@ -33,16 +26,12 @@ public:
 		const unsigned int inputCount,
 		const unsigned int outputCount,
 		const unsigned int wordCount,
-		const bool* data)
+		const unsigned char* data)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		if (inputCount <= 2 || outputCount <= 0)
-		{
-			return;
-		}
-		this->data = new bool[outputCount * (unsigned int)pow(2, inputCount - 2)]{ false };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 
-		for (unsigned int i = 0; i < wordCount * outputCount; i++)
+		for (unsigned int i = 0; i < wordCount; i++)
 		{
 			this->data[i] = data[i];
 		}
@@ -55,11 +44,7 @@ public:
 		unsigned int outputCount)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		if (inputCount <= 2 || outputCount <= 0)
-		{
-			return;
-		}
-		this->data = new bool[outputCount * (unsigned int)pow(2, inputCount - 2)]{ false };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 	}
 
 	ROM(Board* board,
@@ -68,16 +53,12 @@ public:
 		const unsigned int inputCount,
 		const unsigned int outputCount,
 		const unsigned int wordCount,
-		const bool* data)
+		const unsigned char* data)
 		: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		if (inputCount <= 2 || outputCount <= 0)
-		{
-			return;
-		}
-		this->data = new bool[outputCount * (unsigned int)pow(2, inputCount)] { false };
+		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
 		
-		for (unsigned int i = 0; i < wordCount * outputCount; i++)
+		for (unsigned int i = 0; i < wordCount; i++)
 		{
 			this->data[i] = data[i];
 		}
@@ -88,18 +69,18 @@ public:
 	}
 
 	void compute() override {
-		unsigned int position = 0;
+		unsigned long position = 0;
 
-		for (auto i = this->inputCount - 1; i <= 0; i++)
-		{
+		for (unsigned int i = 0; i < this->inputCount; i++) {
 			position |= this->inputs[i].getPowered() << i;
 		}
+		position *= outputCount;
 		
 		for (unsigned int i = 0; i < this->outputCount; i++)
 		{
-			this->outputs[i].setPowered(data[position + i]);
+			this->outputs[i].setPowered((unsigned char)(data[(position + i) / CHAR_BIT] << (CHAR_BIT - 1 - (position + i) % 8)) >> (CHAR_BIT - 1));
 		}
 	}
 private:
-	bool* data;
+	unsigned char* data;
 };

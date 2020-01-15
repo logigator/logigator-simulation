@@ -18,44 +18,38 @@
 #include "half_addr.h"
 #include "full_addr.h"
 #include "rom.h"
+#include "d_ff.h"
+#include "jk_ff.h"
+#include "sr_ff.h"
 
-std::map<std::string, Board*> boards;
+Board* board = new Board();
+Component** components = nullptr;
+Link* links = nullptr;
 
-void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 2 || !args[0]->IsName() || !args[1]->IsObject()) {
-		Nan::ThrowSyntaxError("Usage: newBoards([string]identifier, [object]data");
+void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
+	if (args.Length() != 1 || !args[0]->IsObject()) {
+		Nan::ThrowSyntaxError("Usage: initBoard([object]board)");
 		return;
 	}
 
-	unsigned int threadCount = 1;
-	unsigned int componentCount = 0;
-	unsigned int linkCount = 0;
-	Component** components;
-	Link* links;
-
-	std::string identifier(*Nan::Utf8String(args[0]));
-	v8::Local<v8::Object> obj = args[1]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
-
-	if (boards.count(identifier)) {
-		Nan::ThrowError("Identifier already used!");
+	if (components != nullptr || links != nullptr)
+	{
+		Nan::ThrowError("Board is already initialized. Destroy the old one first.");
 		return;
 	}
 
+	const auto obj = args[0]->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 	if (!Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->IsNumber()) {
-		Nan::ThrowError("Invalid number of links!");
+		Nan::ThrowError("Invalid number of links.");
 		return;
 	}
 
-	Board* board = new Board();
-
-	if (Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->IsNumber())
-		threadCount = Nan::Get(obj, Nan::New("threads").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
-
-	linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();
+	unsigned int linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust();;
 	links = new Link[linkCount];
 	for (unsigned int i = 0; i < linkCount; i++) {
 		new (&links[i]) Link(board);
 	}
+	unsigned int componentCount = 0;
 
 	if (Nan::Get(obj, Nan::New("components").ToLocalChecked()).ToLocalChecked()->IsArray()) {
 		const auto v8Components = v8::Local<v8::Array>::Cast(Nan::Get(obj, Nan::New("components").ToLocalChecked()).ToLocalChecked());
@@ -65,126 +59,161 @@ void newBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		for (unsigned int i = 0; i < componentCount; i++) {
 			const auto v8Component = Nan::Get(v8Components, i).ToLocalChecked()->ToObject(Nan::GetCurrentContext()).ToLocalChecked();
 
-			const char* componentType = *Nan::Utf8String(Nan::Get(v8Component, Nan::New("type").ToLocalChecked()).ToLocalChecked());
+			const auto componentType = Nan::To<int32_t>(Nan::Get(v8Component, Nan::New("type").ToLocalChecked()).ToLocalChecked()).FromJust();
 			const auto v8ComponentInputs = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("inputs").ToLocalChecked()).ToLocalChecked());
-			Link** componentInputs = new Link*[v8ComponentInputs->Length()];
+			auto** componentInputs = new Link*[v8ComponentInputs->Length()];
 			for (unsigned int j = 0; j < v8ComponentInputs->Length(); j++)
-				componentInputs[j] = &links[Nan::Get(v8ComponentInputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
+				componentInputs[j] = &links[Nan::To<int32_t>(Nan::Get(v8ComponentInputs, j).ToLocalChecked()).FromJust()];
 
 			const auto v8ComponentOutputs = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("outputs").ToLocalChecked()).ToLocalChecked());
-			Link** componentOutputs = new Link*[v8ComponentOutputs->Length()];
+			auto** componentOutputs = new Link*[v8ComponentOutputs->Length()];
 			for (unsigned int j = 0; j < v8ComponentOutputs->Length(); j++)
-				componentOutputs[j] = &links[Nan::Get(v8ComponentOutputs, j).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust()];
+				componentOutputs[j] = &links[Nan::To<int32_t>(Nan::Get(v8ComponentOutputs, j).ToLocalChecked()).FromJust()];
+
+			v8::Local<v8::Array> ops = v8::Local<v8::Array>();
+			if (Nan::Get(v8Component, Nan::New("ops").ToLocalChecked()).ToLocalChecked()->IsArray())
+			{
+				ops = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("ops").ToLocalChecked()).ToLocalChecked());
+			}
 			
-			if (!strcmp(componentType, "AND"))
-				components[i] = AND::generateOptimized(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-			else if (!strcmp(componentType, "INPUT"))
+			if (componentType >= 200 && componentType < 300) {
 				components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
-			else if (!strcmp(componentType, "CLK"))
-				components[i] = new CLK(board, componentInputs, componentOutputs, Nan::Get(v8Component, Nan::New("CLK_Speed").ToLocalChecked()).ToLocalChecked()->Int32Value(Nan::GetCurrentContext()).FromJust());
-			else if (!strcmp(componentType, "DELAY"))
-				components[i] = new DELAY(board, componentInputs, componentOutputs);
-			else if (!strcmp(componentType, "NOT"))
-				components[i] = new NOT(board, componentInputs, componentOutputs);
-			else if (!strcmp(componentType, "OR"))
-				components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-			else if (!strcmp(componentType, "XOR"))
-				components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-			else if (!strcmp(componentType, "HALF_ADDER"))
-				components[i] = new HalfAddr(board, componentInputs, componentOutputs);
-			else if (!strcmp(componentType, "FULL_ADDER"))
-				components[i] = new FullAddr(board, componentInputs, componentOutputs);
-			else if (!strcmp(componentType, "ROM")) {
-				const auto v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
-				auto* data = new bool[v8Data->Length()];
-				for (unsigned int j = 0; j < v8Data->Length(); j++)
-				{
-					data[j] = Nan::To<bool>(Nan::Get(v8Components, i).ToLocalChecked()).FromJust();
-				}
-				components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
-				delete[] data;
 			}
 			else {
-				Nan::ThrowTypeError((std::string("Error: Component '") + std::string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
-				return;
+				unsigned char* data;
+				v8::Local<v8::Array> v8Data;
+				switch (componentType)
+				{
+					case 1:
+						components[i] = new NOT(board, componentInputs, componentOutputs);
+						break;
+					case 2:
+						components[i] = new AND(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+						break;
+					case 3:
+						components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+						break;
+					case 4:
+						components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+						break;
+					case 5:
+						components[i] = new DELAY(board, componentInputs, componentOutputs);
+						break;
+					case 6:
+						if (ops->Length() > 0) components[i] = new CLK(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust());
+						break;
+					case 10:
+						components[i] = new HalfAddr(board, componentInputs, componentOutputs);
+						break;
+					case 11:
+						components[i] = new FullAddr(board, componentInputs, componentOutputs);
+						break;
+					case 12:
+						v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
+						data = new unsigned char[v8Data->Length()];
+						for (unsigned int j = 0; j < v8Data->Length(); j++)
+						{
+							data[j] = (unsigned char)Nan::To<int>(Nan::Get(v8Components, i).ToLocalChecked()).FromJust();
+						}
+						components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
+						delete[] data;
+						break;
+					case 13:
+						components[i] = new D_FF(board, componentInputs, componentOutputs);
+						break;
+					case 14:
+						components[i] = new JK_FF(board, componentInputs, componentOutputs);
+						break;
+					case 15:
+						components[i] = new SR_FF(board, componentInputs, componentOutputs);
+						break;
+					default:
+						Nan::ThrowTypeError((std::string("Error: Component '") + std::to_string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
+						return;
+				}
 			}
 		}
 	}
 	else {
 		components = new Component*[0];
 	}
-
-	boards[identifier] = board;
-	board->init(components, links, componentCount, linkCount, (int)threadCount);
+	
+	board->init(components, links, componentCount, linkCount);
 }
 
-void removeBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 1 || !args[0]->IsName()) {
-		Nan::ThrowSyntaxError("No identifier specified!");
-		return;
-	}
-	const std::string identifier(*Nan::Utf8String(args[0]));
+void destroy(const Nan::FunctionCallbackInfo<v8::Value>& args) {
+	delete board;
 
-	if (!boards.count(identifier)) {
-		Nan::ThrowTypeError("Board not found!");
-		return;
-	}
+	components = nullptr;
+	links = nullptr;
 
-	delete boards[identifier];
-	boards.erase(identifier);
+	board = new Board();
 }
 
 void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() < 1 || args.Length() > 2 || !args[0]->IsName()) {
-		Nan::ThrowSyntaxError("No identifier specified!");
+	if (args.Length() > 4) {
+		Nan::ThrowSyntaxError("Usage: startBoard({[number]threads, [number]ticks, [number]ms, [bool]synchronized})");
 		return;
 	}
-	if (args.Length() > 1 && !args[1]->IsNumber()) {
-		Nan::ThrowTypeError("2. argument must be a number!");
+	if (components == nullptr || links == nullptr)
+	{
+		Nan::ThrowError("Board is not initialized yet.");
 		return;
 	}
-
-	const std::string identifier(*Nan::Utf8String(args[0]));
-
-	if (!boards.count(identifier)) {
-		Nan::ThrowTypeError("Board not found!");
-		return;
+	
+	auto threadCount = 1;
+	auto ticks = UINT64_MAX;
+	auto timeout = UINT64_MAX;
+	
+	if (args.Length() > 0) {
+		if (!args[0]->IsNumber() || Nan::To<int32_t>(args[0]).FromJust() <= 0) {
+			Nan::ThrowTypeError("Thread count is invalid.");
+			return;
+		}
+		threadCount = Nan::To<int32_t>(args[0]).FromJust();
 	}
-
-	if (args.Length() > 1)
-		boards[identifier]->start(args[1]->Int32Value(Nan::GetCurrentContext()).FromJust(), INT64_MAX);
+	if (args.Length() > 1) {
+		if (!args[1]->IsNumber()) {
+			Nan::ThrowTypeError("Tick count is invalid.");
+			return;
+		}
+		ticks = Nan::To<int64_t>(args[1]).FromJust();
+	}
+	if (args.Length() > 2) {
+		if (!args[2]->IsNumber()) {
+			Nan::ThrowTypeError("Timeout is invalid.");
+			return;
+		}
+		timeout = Nan::To<int64_t>(args[2]).FromJust();
+	}
+	
+	if (args.Length() > 3 && args[3]->IsBoolean() && Nan::To<bool>(args[3]).FromJust())
+	{
+		board->start(ticks, timeout, threadCount, true);
+	}
 	else
-		boards[identifier]->start(INT64_MAX, INT64_MAX);
+	{
+		board->start(ticks, timeout, threadCount);
+	}
 }
 
 void stop(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 1 || !args[0]->IsName()) {
-		Nan::ThrowSyntaxError("No identifier specified!");
-		return;
-	}
-	const std::string identifier(*Nan::Utf8String(args[0]));
-
-	if (!boards.count(identifier)) {
-		Nan::ThrowTypeError("Board not found!");
+	if (components == nullptr || links == nullptr)
+	{
+		Nan::ThrowError("Board is not initialized yet.");
 		return;
 	}
 
-	boards[identifier]->stop();
+	board->stop();
 }
 
 void getStatus(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 1 || !args[0]->IsName()) {
-		Nan::ThrowSyntaxError("No identifier specified!");
-		return;
-	}
-	const std::string identifier(*Nan::Utf8String(args[0]));
-
-	if (!boards.count(identifier)) {
-		Nan::ThrowTypeError("Board not found!");
+	if (components == nullptr || links == nullptr)
+	{
+		Nan::ThrowError("Board is not initialized yet.");
 		return;
 	}
 
-	auto* board = boards[identifier];
 	const auto obj = Nan::New<v8::Object>();
 	
 	Nan::Set(obj, Nan::New("currentSpeed").ToLocalChecked(), Nan::New((double)board->currentSpeed));
@@ -198,18 +227,12 @@ void getStatus(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 1 || !args[0]->IsName()) {
-		Nan::ThrowSyntaxError("No identifier specified!");
-		return;
-	}
-	const std::string identifier(*Nan::Utf8String(args[0]));
-
-	if (!boards.count(identifier)) {
-		Nan::ThrowTypeError("Board not found!");
+	if (components == nullptr || links == nullptr)
+	{
+		Nan::ThrowError("Board is not initialized yet.");
 		return;
 	}
 
-	Board* board = boards[identifier];
 	const auto v8Components = Nan::New<v8::Array>();
 
 	for (unsigned int i = 0; i < board->componentCount; i++) {
@@ -233,34 +256,40 @@ void getBoard(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	args.GetReturnValue().Set(v8Board);
 }
 
+void getLinks(const Nan::FunctionCallbackInfo<v8::Value>& args) {
+	if (components == nullptr || links == nullptr)
+	{
+		Nan::ThrowError("Board is not initialized yet.");
+		return;
+	}
+
+	const auto v8Links = Nan::New<v8::Array>(board->linkCount);
+	for (unsigned int i = 0; i < board->linkCount; i++) {
+		Nan::Set(v8Links, i, Nan::New(board->linkStates[i]));
+	}
+	args.GetReturnValue().Set(v8Links);
+}
+
 void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
-	if (args.Length() != 4 || !args[0]->IsName() || !args[1]->IsNumber() || !args[2]->IsNumber() || !args[3]->IsArray()) {
-		Nan::ThrowSyntaxError("Usage: newBoards([String]identifier, [Number]componentIndex, [Number]inputEvent, [Array(bool)]outputs");
+	if (args.Length() != 3 || !args[0]->IsNumber() || !args[1]->IsNumber() || !args[2]->IsArray()) {
+		Nan::ThrowSyntaxError("Usage: newBoards([String]componentIndex, [Number]event, [Array(bool)]outputs)");
 		return;
 	}
-	const std::string identifier(*Nan::Utf8String(args[0]));
 
-	if (!boards.count(identifier)) {
-		Nan::ThrowTypeError("Board not found!");
-		return;
-	}
-	Board* board = boards[identifier];
-
-	const unsigned int componentIndex = args[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+	const unsigned int componentIndex = Nan::To<int32_t>(args[0]).FromJust();
 	if (componentIndex > board->componentCount) {
 		Nan::ThrowTypeError("Component not found!");
 		return;
 	}
-	
-	auto* userInput = (UserInput*)(board->getComponents()[componentIndex]);
-	const auto inputEvent = static_cast<UserInput::InputEvent>(args[2]->Int32Value(Nan::GetCurrentContext()).FromJust());
 
+	const auto inputEvent = static_cast<UserInput::InputEvent>(Nan::To<int32_t>(args[1]).FromJust());
 	if (inputEvent < 0 || inputEvent >= UserInput::InputEvent::Max) {
-		Nan::ThrowTypeError("InputEvent invalid!");
+		Nan::ThrowTypeError("Unrecognized input event.");
 		return;
 	}
-
-	const auto stateArray = v8::Local<v8::Array>::Cast(args[3]);
+	
+	auto* userInput = (UserInput*)(board->getComponents()[componentIndex]);
+	const auto stateArray = v8::Local<v8::Array>::Cast(args[2]);
 
 	if (userInput->getOutputCount() <= 0)
 		return;
@@ -275,12 +304,13 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 void Initialize(v8::Local<v8::Object> exports) {
-	Nan::Set(exports, Nan::New("newBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(newBoard)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("removeBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(removeBoard)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("startBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(start)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("stopBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(stop)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("getBoardStatus").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getStatus)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("init").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(init)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("destroy").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(destroy)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("start").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(start)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("stop").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(stop)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("getStatus").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getStatus)).ToLocalChecked());
 	Nan::Set(exports, Nan::New("getBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getBoard)).ToLocalChecked());
+	Nan::Set(exports, Nan::New("getLinks").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getLinks)).ToLocalChecked());
 	Nan::Set(exports, Nan::New("triggerInput").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(triggerInput)).ToLocalChecked());
 }
 

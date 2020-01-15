@@ -49,20 +49,21 @@ import {BoardObject, logicsim} from "logicsim";
 ### Functions
 | Function | Description |
 | --- | --- |
-| `logicsim.newBoard(/*unique identifier for your board*/, /*object with the contents of the board, see below for an example*/);`  | Creates a new Board |
-| `logicsim.startBoard(/*identifier*/ [, /*amount of ticks the simulation will run, leave out for endless simulation*/ ]);` | Starts a Board |
-| `logicsim.stopBoard(/*identifier*/);` | Stops a Board, if simulation is running |
-| `logicsim.getBoardStatus(/*identifier*/);` | Gets the current Status of a Board, like passed ticks, current execution state or current simulation speed |
-| `logicsim.getBoard(/*identifier*/);` | Gets the components and their current state of a board |
-| `logicsim.triggerInput(/*identifier*/, /*index of component to trigger*/, /*index of input on component*/, /*input event (0 = down, 1 = up)*/)` | Triggers an input element on a board |
+| `logicsim.init(board);` | Creates a new Board. A sample board object can be found below. |
+| `logicsim.start(threads, ticks, ms);` | Runs the simulation until either the ticks were simulated or the simulation time was reached. |
+| `logicsim.stop();` | Stops the simulation if running. |
+| `logicsim.getStatus();` | Gets the current Status of a Board, like simulated ticks, current execution state or current simulation speed |
+| `logicsim.getLinks();` | Gets states of all links |
+| `logicsim.getBoard();` | Gets all components and links and their current state |
+| `logicsim.triggerInput(/*index of component*/, /*0 = set, 1 = pulse*/, /*array of states for input*/);` | Triggers an input element on a board |
+| `logicsim.destroy();` | Destroys current board. This is required before initializing a new board. |
 ### Sample Board Object:
 ```json
 {
   "links": 4,
-  "threads": 1,
   "components": [
   	{
-  		"type": "SWITCH",
+  		"type": 200,
   		"inputs": [
   		],
   		"outputs": [
@@ -70,7 +71,7 @@ import {BoardObject, logicsim} from "logicsim";
   		]
   	},
   	{
-  		"type": "XOR",
+  		"type": 4,
   		"inputs": [
   			0, 1
   		],
@@ -79,7 +80,7 @@ import {BoardObject, logicsim} from "logicsim";
   		]
   	},
   	{
-  		"type": "AND",
+  		"type": 2,
   		"inputs": [
   			0, 2
   		],
@@ -145,26 +146,28 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 ### Functions
 | Function | Description |
 | --- | --- |
-| `Module.start();` | Starts the simulation indefinetly. (Keep in mind that this operation locks the current thread.) |
-| `Module.startTimeout(ms);` | Runs the simulation for x ms. |
-| `Module.startManual(ticks);` | Runs the simulation for x ticks. |
-| `Module.stop();` | Stops the simulation if running. (Probably useless in webAssembly as operations lock current thread anyway.) |
+| `Module.start(ticks, ms);` | Runs the simulation until either the ticks were simulated or the simulation time was reached. |
+| `Module.stop();` | Stops the simulation if running. (Probably useless in webAssembly as active simulation locks current thread anyway.) |
 | `Module.getStatus();` | Returns object with data for current state of the simulation |
 | `Module.getLinks();` | Returns pointer with the states of all links (1 byte per element, Array length equals number of links on board) |
 | `Module.getComponents();` | Return pointer with the states of all inputs and outputs of all components. Format: (component\[0\] inputs)(component\[0\] outputs)(component\[1\] inputs)(component\[1\] outputs)...(component\[n\] inputs)(component\[n\] outputs)  |
-| `Module.triggerInput(/*index of component*/, /*0 = set, 1 = pulse*/, /*pointer to array of states of components*/);` | Triggers a user input |
-| `Module.destroy();` | Destroys current board. This is required before being able to initialize a new board. |
-### Component Types
-| Type ID | Name | Inputs | Outputs | Op1 | Op2 |
-| --- | --- | --- | --- | --- | --- |
-| 1 | NOT | 1 | 1 | x | x |
-| 2 | AND | 2 - 2^32 | 1 | x | x |
-| 3 | OR | 2 - 2^32 | 1 | x | x |
-| 4 | XOR | 2 - 2^32 | 1 | x | x |
+| `Module.triggerInput(/*index of component*/, /*0 = set, 1 = pulse*/, /*pointer to array of states for inputs*/);` | Triggers a user input |
+| `Module.destroy();` | Destroys current board. This is required before initializing a new board. |
+## Component Types
+| Type ID | Name | Inputs | Outputs | Ops |
+| --- | --- | --- | --- | --- |
+| 1 | NOT | 1 | 1 | x |
+| 2 | AND | 2 - 2^32 | 1 | x |
+| 3 | OR | 2 - 2^32 | 1 | x |
+| 4 | XOR | 2 - 2^32 | 1 | x |
 | 5 | DELAY | 1 | 1 | x | x |
-| 6 | CLOCK | 1 | 1 | Ticks between clock pulses | x |
-| 10 | Half Adder | 2 | 2 | x | x |
-| 11 | Full Adder | 3 | 2 | x | x |
-| 200 | User Input | 0 | 1 - 2^32 | x | x |
+| 6 | CLOCK | 1 | 1 | [0] => Ticks between clock pulses |
+| 10 | Half Adder | 2 | 2 | x |
+| 11 | Full Adder | 3 | 2 | x |
+| 12 | ROM | 1 - 16 | 1 - 64 | [0..n] => Data for ROM (1 Byte per element) |
+| 13 | D Flip-Flop | 2 | 2 | x |
+| 14 | JK Flip-Flop | 3 | 2 | x |
+| 15 | SR Flip-Flop | 3 | 2 | x |
+| 200 | User Input | 0 | 1 - 2^32 | x |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
