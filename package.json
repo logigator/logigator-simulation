@@ -1,5 +1,5 @@
 {
-  "name": "logigator-simulation",
+  "name": "@logigator/logigator-simulation",
   "version": "1.0.0",
   "description": "Multi-Threaded Simulator for Logic Circuits as Node.JS Native C++ or WebAssembly Module.",
   "main": "index.js",
