@@ -60,6 +60,12 @@ public:
 		while (gen == m_generation)
 			std::this_thread::yield();
 	}
+
+	void setStageCount(const unsigned int count)
+	{
+		m_count_reset_value = count;
+		m_count = count;
+	}
 private:
 	std::atomic<unsigned int> m_count;
 	std::atomic<unsigned int> m_generation;

@@ -88,7 +88,6 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 	this->components = components;
 	this->links = links;
-	this->threadCount = threadCount;
 	this->componentCount = componentCount;
 	this->linkCount = linkCount;
 
@@ -119,10 +118,9 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	
 	currentState = Board::Stopped;
 
-	threads = new std::thread*[threadCount] { nullptr };
 	lastCapture = std::chrono::high_resolution_clock::now();
 
-	barrier = new SpinlockBarrier(threadCount, [this]() {
+	barrier = new SpinlockBarrier(0, [this]() {
 		auto* readPointer(readBuffer);
 
 		readBuffer = writeBuffer;
@@ -264,7 +262,6 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 
 	this->cyclesLeft = cyclesLeft;
 	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
-	this->threadCount = threadCount;
 	this->currentState = Board::Running;
 
 	if (this->cyclesLeft <= 0 || this->timeout <= 0)
@@ -273,16 +270,23 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 		return;
 	}
 
-	for (unsigned int i = 0; i < threadCount; i++) {
+	for (unsigned int i = 0; i < this->threadCount; i++)
+	{
 		if (threads[i] != nullptr)
 			delete threads[i];
+	}
+	delete[] this->threads;
+	this->threads = new std::thread*[threadCount] { nullptr };
+	this->threadCount = threadCount;
+	this->barrier->setStageCount(threadCount);
 
+	for (unsigned int i = 0; i < threadCount; i++) {
 		threads[i] = new std::thread([this](const int id) {
 			while (true) {
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned int i = id; i < componentCount; i += this->threadCount) {
+				for (unsigned long i = id; i < componentCount; i += this->threadCount) {
 					if (readBuffer[i])
 						components[i]->compute();
 					wipeBuffer[i] = false;
