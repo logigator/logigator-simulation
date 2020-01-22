@@ -79,11 +79,11 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 		*links[i].poweredNext = this->linkDefaults[i];
 	}
 
-	if (linkCount > 0) {
-		buffer1 = new bool[linkCount] { false };
-		buffer2 = new bool[linkCount] { false };
-		buffer3 = new bool[linkCount] { false };
-		std::fill_n(buffer1, linkCount, 1);
+	if (componentCount > 0) {
+		buffer1 = new bool[componentCount] { false };
+		buffer2 = new bool[componentCount] { false };
+		buffer3 = new bool[componentCount] { false };
+		std::fill_n(buffer1, componentCount, 1);
 	}
 	else {
 		buffer1 = new bool[0];
@@ -253,14 +253,21 @@ void Board::startInternal(unsigned long long cyclesLeft, unsigned long long ns)
 	this->started = std::chrono::high_resolution_clock::now();
 
 	while (true) {
-		for (unsigned int i = 0; i < linkCount; i++) {
+		for (unsigned int i = 0; i < componentCount; i++) {
+			if (readBuffer[i]) {
+				components[i]->compute();
+			}
+			wipeBuffer[i] = false;
+		}
+
+		/*for (unsigned int i = 0; i < linkCount; i++) {
 			if (readBuffer[i]) {
 				for (unsigned int j = 0; j < links[i].outputCount; j++) {
 					links[i].outputs[j]->compute();
 				}
 			}
 			wipeBuffer[i] = false;
-		}
+		}*/
 
 		for (unsigned int i = 0; i < linkCount; i++) {
 			if (writeBuffer[i])

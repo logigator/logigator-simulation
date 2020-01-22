@@ -63,11 +63,5 @@ public:
 	{
 		*poweredNext = val;
 	}
-
-	void update() const
-	{
-		if (*poweredNext != *poweredCurrent)
-			board->writeBuffer[linkIndex] = true;
-	}
 };
 

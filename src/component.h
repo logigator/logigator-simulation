@@ -70,4 +70,10 @@ protected:
 
 		componentIndex = board->getNextComponentIndex();
 	}
+
+	void update() const
+	{
+		if (*poweredNext != *poweredCurrent)
+			board->writeBuffer[linkIndex] = true;
+	}
 };
