@@ -17,9 +17,12 @@ Board::~Board()
 	for (unsigned int i = 0; i < componentCount; i++) {
 		delete components[i];
 	}
-	delete[] components;
 
-	delete[] links;
+	if (componentCount > 0)
+		delete[] components;
+
+	if (linkCount > 0)
+		delete[] links;
 
     #ifndef __EMSCRIPTEN__
 

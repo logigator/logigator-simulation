@@ -303,15 +303,19 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	userInput->triggerUserInput(state, inputEvent);
 }
 
-void Initialize(v8::Local<v8::Object> exports) {
-	Nan::Set(exports, Nan::New("init").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(init)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("destroy").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(destroy)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("start").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(start)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("stop").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(stop)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("getStatus").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getStatus)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("getBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getBoard)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("getLinks").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getLinks)).ToLocalChecked());
-	Nan::Set(exports, Nan::New("triggerInput").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(triggerInput)).ToLocalChecked());
+NAN_MODULE_INIT(Init) {
+	Nan::Set(target, Nan::New("init").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(init)).ToLocalChecked());
+	Nan::Set(target, Nan::New("destroy").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(destroy)).ToLocalChecked());
+	Nan::Set(target, Nan::New("start").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(start)).ToLocalChecked());
+	Nan::Set(target, Nan::New("stop").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(stop)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getStatus").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getStatus)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getBoard").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getBoard)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getLinks").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(getLinks)).ToLocalChecked());
+	Nan::Set(target, Nan::New("triggerInput").ToLocalChecked(), Nan::GetFunction(Nan::New<v8::FunctionTemplate>(triggerInput)).ToLocalChecked());
 }
 
-NODE_MODULE(NODE_GYP_MODULE_NAME, Initialize)
+#if NODE_MAJOR_VERSION >= 10
+NAN_MODULE_WORKER_ENABLED(keytar, Init)
+#else
+NODE_MODULE(keytar, Init)
+#endif
