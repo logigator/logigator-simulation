@@ -297,7 +297,7 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 				}
 				barrier->wait();
 
-				for (unsigned int i = id; i < linkCount; i += this->threadCount) {
+				for (unsigned long i = id; i < linkCount; i += this->threadCount) {
 					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
 				}
 				barrier->wait();
