@@ -1,6 +1,7 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
+#include "fast_stack.h"
 #include "board.h"
 #include "component.h"
 #include "link.h"
@@ -35,8 +36,8 @@ Board::~Board()
 	#endif
 
 	delete[] linkStates;
-	delete[] readBuffer;
-	delete[] writeBuffer;
+	delete readBuffer;
+	delete writeBuffer;
 }
 
 #ifdef __EMSCRIPTEN__
@@ -60,25 +61,18 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 		links[i].powered = &this->linkStates[i];
 	}
 
-	if (componentCount > 0) {
-		buffer1 = new bool[componentCount] { false };
-		buffer2 = new bool[componentCount] { false };
-		buffer3 = new bool[componentCount] { false };
-		std::fill_n(buffer1, componentCount, 1);
-	}
-	else {
-		buffer1 = new bool[0];
-		buffer2 = new bool[0];
-		buffer3 = new bool[0];
-	}
-
-	readBuffer = Board::buffer1;
-	writeBuffer = Board::buffer2;
-	wipeBuffer = Board::buffer3;
-
 	currentState = Board::Stopped;
-
 	lastCapture = std::chrono::high_resolution_clock::now();
+
+	for (unsigned int i = 0; i < componentCount; i++)
+	{
+		components[i]->init();
+	}
+
+	auto* readBuffer = this->readBuffer;
+	this->readBuffer = this->writeBuffer;
+	this->writeBuffer = readBuffer;
+	this->writeBuffer->clear();
 }
 
 #else
@@ -102,21 +96,6 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	{
 		links[i].powered = &this->linkStates[i];
 	}
-
-	if (componentCount > 0)
-	{
-		readBuffer = new Component*[componentCount + 1] { nullptr };
-		writeBuffer = new Component*[componentCount + 1] { nullptr };
-		for (unsigned int i = 0; i < componentCount; i++)
-		{
-			readBuffer[i] = components[i];
-		}
-	}
-	else
-	{
-		readBuffer = new Component*[0];
-		writeBuffer = new Component*[0];
-	}
 	
 	currentState = Board::Stopped;
 	lastCapture = std::chrono::high_resolution_clock::now();
@@ -126,17 +105,19 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 		components[i]->init();
 	}
 
+	auto* readBuffer = this->readBuffer;
+	this->readBuffer = this->writeBuffer;
+	this->writeBuffer = readBuffer;
+	this->writeBuffer->clear();
+
 	barrier = new SpinlockBarrier(0, [this]() {
+		tickEvent.emit(nullptr, Events::EventArgs());
+		
 		auto* readBuffer = this->readBuffer;
 		this->readBuffer = this->writeBuffer;
 		this->writeBuffer = readBuffer;
-		for (auto i = 0; this->writeBuffer[i]; i++)
-		{
-			this->writeBuffer[i] = nullptr;
-		}
-		std::atomic_store_explicit(&this->bufferCount, 0, std::memory_order_relaxed);
+		this->writeBuffer->clear();
 		
-		tickEvent.emit(nullptr, Events::EventArgs());
 		tick++;
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
@@ -221,24 +202,32 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 		return;
 	}
 
+	FastStack<Component*> compFlags;
 	while (true) {
-		for (unsigned int i = 0; i < componentCount; i++) {
-			if (readBuffer[i])
-				components[i]->compute();
-			wipeBuffer[i] = false;
+		for (unsigned long i = 0; i < this->readBuffer->count(); i++) {
+			const auto result = std::any_of(this->readBuffer->operator[](i)->outputs, this->readBuffer->operator[](i)->outputs + this->readBuffer->operator[](i)->outputCount, [](Output* x) { return x->getPowered(); });
+			if (*this->readBuffer->operator[](i)->powered != result)
+			{
+				*this->readBuffer->operator[](i)->powered = result;
+				for (unsigned int j = 0; j < this->readBuffer->operator[](i)->inputCount; j++)
+				{
+					compFlags.push(this->readBuffer->operator[](i)->inputs[j]->getComponent());
+				}
+			}
 		}
 
-		for (unsigned int i = 0; i < linkCount; i++) {
-			*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
+		while (!compFlags.empty())
+		{
+			compFlags.pop()->compute();
 		}
 
-		auto* readPointer(readBuffer);
+		tickEvent.emit(nullptr, Events::EventArgs());
 
-		readBuffer = writeBuffer;
-		writeBuffer = wipeBuffer;
-		wipeBuffer = readPointer;
-
-        tickEvent.emit(nullptr, Events::EventArgs());
+		auto* readBuffer = this->readBuffer;
+		this->readBuffer = this->writeBuffer;
+		this->writeBuffer = readBuffer;
+		this->writeBuffer->clear();
+		
 		tick++;
 
 		const auto timestamp = std::chrono::high_resolution_clock::now();
@@ -255,7 +244,7 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 			return;
 		}
 
-		if (!--this->cyclesLeft || currentState == Board::Stopping) {
+		if (!--cyclesLeft || currentState == Board::Stopping) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -292,18 +281,31 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 
 	for (unsigned int i = 0; i < threadCount; i++) {
 		threads[i] = new std::thread([this](const int id) {
+			FastStack<Component*> compFlags;
+			
 			while (true) {
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned long i = id; this->readBuffer[i] && i < this->componentCount; i += this->threadCount) {
-					this->readBuffer[i]->compute();
+				for (unsigned long i = id; i < this->readBuffer->count(); i += this->threadCount) {
+					const auto result = std::any_of(this->readBuffer->operator[](i)->outputs, this->readBuffer->operator[](i)->outputs + this->readBuffer->operator[](i)->outputCount, [](Output* x) { return x->getPowered(); });
+					if (*this->readBuffer->operator[](i)->powered != result)
+					{
+						*this->readBuffer->operator[](i)->powered = result;
+						for (unsigned int j = 0; j < this->readBuffer->operator[](i)->inputCount; j++)
+						{
+							compFlags.push(this->readBuffer->operator[](i)->inputs[j]->getComponent());
+						}
+					}
 				}
+
 				barrier->wait();
 
-				for (unsigned long i = id; i < linkCount; i += this->threadCount) {
-					*links[i].powered = std::any_of(links[i].outputs, links[i].outputs + links[i].outputCount, [](Output* x) { return x->getPowered(); });
+				while(!compFlags.empty())
+				{
+					compFlags.pop()->compute();
 				}
+
 				barrier->wait();
 			}
 		}, i);
