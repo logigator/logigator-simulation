@@ -119,8 +119,12 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	}
 	
 	currentState = Board::Stopped;
-
 	lastCapture = std::chrono::high_resolution_clock::now();
+
+	for (unsigned int i = 0; i < componentCount; i++)
+	{
+		components[i]->init();
+	}
 
 	barrier = new SpinlockBarrier(0, [this]() {
 		auto* readBuffer = this->readBuffer;

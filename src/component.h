@@ -15,6 +15,8 @@ public:
 	}
 
 	virtual void compute() = 0;
+
+	virtual void init() { }
 	
 	Input* getInputs() const
 	{
