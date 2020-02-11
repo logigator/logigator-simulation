@@ -35,9 +35,8 @@ Board::~Board()
 	#endif
 
 	delete[] linkStates;
-	delete[] buffer1;
-	delete[] buffer2;
-	delete[] buffer3;
+	delete[] readBuffer;
+	delete[] writeBuffer;
 }
 
 #ifdef __EMSCRIPTEN__
@@ -99,37 +98,40 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	else
 		this->linkStates = new bool[0];
 
-	for (unsigned int i = 0; i < linkCount; i++) {
+	for (unsigned int i = 0; i < linkCount; i++)
+	{
 		links[i].powered = &this->linkStates[i];
 	}
 
-	if (componentCount > 0) {
-		buffer1 = new bool[componentCount] { false };
-		buffer2 = new bool[componentCount] { false };
-		buffer3 = new bool[componentCount] { false };
-		std::fill_n(buffer1, componentCount, 1);
+	if (componentCount > 0)
+	{
+		readBuffer = new Component*[componentCount + 1] { nullptr };
+		writeBuffer = new Component*[componentCount + 1] { nullptr };
+		for (unsigned int i = 0; i < componentCount; i++)
+		{
+			readBuffer[i] = components[i];
+		}
 	}
-	else {
-		buffer1 = new bool[0];
-		buffer2 = new bool[0];
-		buffer3 = new bool[0];
+	else
+	{
+		readBuffer = new Component*[0];
+		writeBuffer = new Component*[0];
 	}
-
-	readBuffer = Board::buffer1;
-	writeBuffer = Board::buffer2;
-	wipeBuffer = Board::buffer3;
 	
 	currentState = Board::Stopped;
 
 	lastCapture = std::chrono::high_resolution_clock::now();
 
 	barrier = new SpinlockBarrier(0, [this]() {
-		auto* readPointer(readBuffer);
-
-		readBuffer = writeBuffer;
-		writeBuffer = wipeBuffer;
-		wipeBuffer = readPointer;
-
+		auto* readBuffer = this->readBuffer;
+		this->readBuffer = this->writeBuffer;
+		this->writeBuffer = readBuffer;
+		for (auto i = 0; this->writeBuffer[i]; i++)
+		{
+			this->writeBuffer[i] = nullptr;
+		}
+		std::atomic_store_explicit(&this->bufferCount, 0, std::memory_order_relaxed);
+		
 		tickEvent.emit(nullptr, Events::EventArgs());
 		tick++;
 
@@ -290,10 +292,8 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned long i = id; i < componentCount; i += this->threadCount) {
-					if (readBuffer[i])
-						components[i]->compute();
-					wipeBuffer[i] = false;
+				for (unsigned long i = id; this->readBuffer[i] && i < this->componentCount; i += this->threadCount) {
+					this->readBuffer[i]->compute();
 				}
 				barrier->wait();
 

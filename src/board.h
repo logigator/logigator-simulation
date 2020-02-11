@@ -15,9 +15,6 @@ public:
 	~Board();
 	void init(Component** components, Link* links, unsigned int componentCount, unsigned int linkCount);
 	unsigned int getNextComponentIndex();
-	bool* readBuffer = nullptr;
-	bool* writeBuffer = nullptr;
-	bool* wipeBuffer = nullptr;
 	size_t componentCount = 0;
 	size_t linkCount = 0;
 	bool* linkStates = nullptr;
@@ -31,11 +28,10 @@ public:
 	Events::Event<> tickEvent;
 	void stop();
 	void start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, bool synchronized = false);
-	
+	Component** readBuffer = nullptr;
+	Component** writeBuffer = nullptr;
+	std::atomic<unsigned long> bufferCount = 0;
 private:
-	bool* buffer1 = nullptr;
-	bool* buffer2 = nullptr;
-	bool* buffer3 = nullptr;
 	unsigned int threadCount = 0;
 	Component** components = nullptr;
 	Link* links = nullptr;

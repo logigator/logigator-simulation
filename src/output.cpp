@@ -8,6 +8,6 @@ void Output::setPowered(const bool state)
 		powered = state;
 
 		for (unsigned int i = 0; i < link->inputCount; i++)
-			link->board->writeBuffer[link->inputs[i]->getComponent()->componentIndex] = true;
+			link->board->writeBuffer[std::atomic_fetch_add_explicit(&link->board->bufferCount, 1, std::memory_order_relaxed)] = component;
 	}
 }
