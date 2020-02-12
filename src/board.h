@@ -1,8 +1,8 @@
 #pragma once
 #include <thread>
 #include <chrono>
-#include <atomic>
 #include "events.h"
+#include "fast_stack_atomic.h"
 
 class Component;
 class SpinlockBarrier;
@@ -28,9 +28,9 @@ public:
 	Events::Event<> tickEvent;
 	void stop();
 	void start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, bool synchronized = false);
-	Component** readBuffer = nullptr;
-	Component** writeBuffer = nullptr;
-	std::atomic<unsigned long> bufferCount = 0;
+	FastStackAtomic<Link*>* readBuffer = new FastStackAtomic<Link*>();
+	FastStackAtomic<Link*>* writeBuffer = new FastStackAtomic<Link*>();
+
 private:
 	unsigned int threadCount = 0;
 	Component** components = nullptr;
