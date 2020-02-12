@@ -8,12 +8,10 @@ class JK_FF :
 	public Component
 {
 public:
-	JK_FF(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, 3, 2)
-	{
-		this->outputs[1].setPowered(true);
-	}
+	JK_FF(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, 3, 2) { }
+	JK_FF(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 3, 2) { }
 
-	JK_FF(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 3, 2)
+	void init() override
 	{
 		this->outputs[1].setPowered(true);
 	}
