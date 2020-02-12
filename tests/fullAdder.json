@@ -1,5 +1,5 @@
 {
-	"ticks": 3,
+	"ticks": 4,
 	"expected": {
 		"links": [
 			false, true, true, false, true, false, false, true
