@@ -1,4 +1,5 @@
 #pragma once
+
 #include "component.h"
 #include "output.h"
 #include "input.h"
@@ -14,32 +15,53 @@ public:
 
 	enum InputEvent { Cont, Pulse, Max };
 	
-	void compute() override {
-
-	}
+	void compute() override { }
 
 	void triggerUserInput(bool* state, const InputEvent inputEvent) {
-		for (unsigned int i = 0; i < outputCount; i++) {
-			this->outputs[i].setPowered(state[i]);
-		}
-
-		if (inputEvent == InputEvent::Pulse && !subscribed) {
+		delete[] pending;
+		pending = new bool[outputCount];
+		memcpy(pending, state, outputCount * sizeof(bool));
+		pendingInput = inputEvent;
+		
+		if (!subscribed) {
 			board->tickEvent += tickEvent;
 			subscribed = true;
-		}
-		else if (inputEvent != InputEvent::Pulse && subscribed) {
-			board->tickEvent -= tickEvent;
-			subscribed = false;
 		}
 	}
 private:
 	bool subscribed = false;
+	bool* pending = nullptr;
+	InputEvent pendingInput = InputEvent::Max;
 
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
-		for (unsigned int i = 0; i < outputCount; i++) {
-			this->outputs[i].setPowered(false);
+		if (pendingInput == InputEvent::Cont)
+		{
+			for (unsigned int i = 0; i < outputCount; i++) {
+				this->outputs[i].setPowered(pending[i]);
+			}
+			delete[] pending;
+			pending = nullptr;
+			board->tickEvent -= tickEvent;
+			subscribed = false;
 		}
-		board->tickEvent -= tickEvent;
-		subscribed = false;
+		else if (pendingInput == InputEvent::Pulse)
+		{
+			if (pending)
+			{
+				for (unsigned int i = 0; i < outputCount; i++) {
+					this->outputs[i].setPowered(pending[i]);
+				}
+				delete[] pending;
+				pending = nullptr;
+			}
+			else
+			{
+				for (unsigned int i = 0; i < outputCount; i++) {
+					this->outputs[i].setPowered(false);
+				}
+				board->tickEvent -= tickEvent;
+				subscribed = false;
+			}
+		}
 	});
 };
