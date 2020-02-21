@@ -54,17 +54,17 @@ public:
 		_count = 0;
 	}
 
-	bool empty()
+	bool empty() const
 	{
 		return _count <= 0;
 	}
 
-	size_t count()
+	size_t count() const
 	{
 		return _count;
 	}
 
-	size_t capacity()
+	size_t capacity() const
 	{
 		return _capacity;
 	}
@@ -85,7 +85,7 @@ private:
 		_capacity *= 2;
 	}
 
-	void _expand(size_t size)
+	void _expand(const size_t size)
 	{
 		T* allocation = new T[size];
 		for (size_t i = 0; i < _capacity; i++)
