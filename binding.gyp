@@ -14,6 +14,8 @@
 		"src/board.h",
 		"src/component.h",
 		"src/events.h",
+		"src/fast_stack.h",
+		"src/fast_stack_atomic.h",
 		"src/input.h",
 		"src/link.h",
 		"src/output.cpp",

@@ -301,6 +301,7 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 	
 	userInput->triggerUserInput(state, inputEvent);
+	delete[] state;
 }
 
 NAN_MODULE_INIT(Init) {

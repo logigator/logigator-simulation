@@ -1,8 +1,8 @@
 #pragma once
 #include <thread>
 #include <chrono>
-#include <atomic>
 #include "events.h"
+#include "fast_stack_atomic.h"
 
 class Component;
 class SpinlockBarrier;
@@ -15,9 +15,6 @@ public:
 	~Board();
 	void init(Component** components, Link* links, unsigned int componentCount, unsigned int linkCount);
 	unsigned int getNextComponentIndex();
-	bool* readBuffer = nullptr;
-	bool* writeBuffer = nullptr;
-	bool* wipeBuffer = nullptr;
 	size_t componentCount = 0;
 	size_t linkCount = 0;
 	bool* linkStates = nullptr;
@@ -31,11 +28,10 @@ public:
 	Events::Event<> tickEvent;
 	void stop();
 	void start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, bool synchronized = false);
-	
+	FastStackAtomic<Link*>* readBuffer = new FastStackAtomic<Link*>();
+	FastStackAtomic<Link*>* writeBuffer = new FastStackAtomic<Link*>();
+
 private:
-	bool* buffer1 = nullptr;
-	bool* buffer2 = nullptr;
-	bool* buffer3 = nullptr;
 	unsigned int threadCount = 0;
 	Component** components = nullptr;
 	Link* links = nullptr;

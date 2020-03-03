@@ -25,7 +25,7 @@ git clone 'http://github.com/logigator/logigator-simulation.git' && cd ./logigat
 ```
 alternatively, you can install it using npm:
 ```shell
-npm install logicsim
+npm install @logigator/logigator-simulation
 ```
 
 To compile to WASM, use this command:
@@ -40,11 +40,11 @@ const logicsim = require('./index').logicsim;
 ```
 Alternatively, if you installed the package using npm, import it with:
 ```javascript
-const logicsim = require('logicsim').logicsim;
+const logicsim = require('@logigator/logigator-simulation').logicsim;
 ```
 You can also import it using typescript:
 ```javascript
-import {BoardObject, logicsim} from "logicsim";
+import {BoardObject, logicsim} from "@logigator/logigator-simulation";
 ```
 ### Functions
 | Function | Description |

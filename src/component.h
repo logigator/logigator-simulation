@@ -16,7 +16,7 @@ public:
 
 	virtual void compute() = 0;
 
-	unsigned int componentIndex;
+	virtual void init() { }
 	
 	Input* getInputs() const
 	{
@@ -78,8 +78,6 @@ protected:
 			outputs[i]->outputs = newOutputs;
 			outputs[i]->outputCount++;
 		}
-
-		componentIndex = board->getNextComponentIndex();
 	}
 
 	Component(Board* board, Input* inputs, Output* outputs, const unsigned int inputCount, const unsigned int outputCount) :
@@ -89,6 +87,5 @@ protected:
 		inputCount(inputCount),
 		outputCount(outputCount)
 	{
-		componentIndex = board->getNextComponentIndex();
 	}
 };

@@ -8,12 +8,10 @@ class SR_FF :
 	public Component
 {
 public:
-	SR_FF(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, 3, 2)
-	{
-		this->outputs[1].setPowered(true);
-	}
-	
-	SR_FF(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 3, 2)
+	SR_FF(Board* board, Input* inputs, Output* outputs) : Component(board, inputs, outputs, 3, 2) { }
+	SR_FF(Board* board, Link** inputs, Link** outputs) : Component(board, inputs, outputs, 3, 2) { }
+
+	void init() override
 	{
 		this->outputs[1].setPowered(true);
 	}
