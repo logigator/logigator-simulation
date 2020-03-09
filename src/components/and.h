@@ -8,11 +8,11 @@ class AND :
 	public Component
 {
 public:
-	AND(Board* board, Input* inputs, Output* outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
-	AND(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	AND(Board* board, Input* inputs, Output* outputs, const size_t inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
+	AND(Board* board, Link** inputs, Link** outputs, const size_t inputCount) : Component(board, inputs, outputs, inputCount, 1) { }
 
 	void compute() override {
-		for (unsigned int i = 0; i < inputCount; i++) {
+		for (size_t i = 0; i < inputCount; i++) {
 			if (!inputs[i].getPowered()) {
 				outputs[0].setPowered(false);
 				return;
@@ -21,7 +21,7 @@ public:
 		outputs[0].setPowered(true);
 	}
 
-	static AND* generateOptimized(Board* board, Link** inputs, Link** outputs, unsigned int inputCount);
+	static AND* generateOptimized(Board* board, Link** inputs, Link** outputs, size_t inputCount);
 private:
 
 };
@@ -52,7 +52,7 @@ public:
 private:
 };
 
-inline AND* AND::generateOptimized(Board* board, Link** inputs, Link** outputs, const unsigned int inputCount) {
+inline AND* AND::generateOptimized(Board* board, Link** inputs, Link** outputs, const size_t inputCount) {
 	switch (inputCount) {
 	case 2:
 		return new AND_2(board, inputs, outputs);

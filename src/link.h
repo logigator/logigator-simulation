@@ -10,8 +10,8 @@ public:
 	Board* board;
 	Input** inputs;
 	Output** outputs;
-	unsigned int inputCount;
-	unsigned int outputCount;
+	size_t inputCount;
+	size_t outputCount;
 	bool* powered;
 
 	Link() :
@@ -34,7 +34,7 @@ public:
 	{
 	}
 
-	Link(Board* board, Input** inputs, Output** outputs, const unsigned int inputCount, const unsigned int outputCount) :
+	Link(Board* board, Input** inputs, Output** outputs, const size_t inputCount, const size_t outputCount) :
 		board(board),
 		inputs(inputs),
 		outputs(outputs),

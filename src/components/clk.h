@@ -17,7 +17,7 @@ public:
         subscribed = true;
 	}
 
-	CLK(Board* board, Input* inputs, Output* outputs, const int speed) : Component(board, inputs, outputs, 1, 1) {
+	CLK(Board* board, Input* inputs, Output* outputs, const int_fast32_t speed) : Component(board, inputs, outputs, 1, 1) {
 		this->speed = speed;
 		board->tickEvent += tickEvent;
         subscribed = true;
@@ -28,7 +28,7 @@ public:
         subscribed = true;
 	}
 
-	CLK(Board* board, Link** inputs, Link** outputs, const int speed) : Component(board, inputs, outputs, 1, 1) {
+	CLK(Board* board, Link** inputs, Link** outputs, const int_fast32_t speed) : Component(board, inputs, outputs, 1, 1) {
 		this->speed = speed;
 		board->tickEvent += tickEvent;
         subscribed = true;
@@ -43,7 +43,7 @@ public:
 	}
 private:
 	bool subscribed = false;
-	int tickCount = 0;
+	int_fast32_t tickCount = 0;
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
 	    if(outputs[0].getPowered()) {
 			outputs[0].setPowered(false);

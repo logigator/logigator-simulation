@@ -35,11 +35,12 @@ public:
 
 	void push(T item)
 	{
-		if (_count.fetch_add(1, std::memory_order_relaxed) >= _capacity)
+		const auto temp = _count.fetch_add(1, std::memory_order_relaxed);
+		if (temp >= _capacity)
 			_expand();
 		
 
-		_data[_count.load() - 1] = item;
+		_data[temp] = item;
 	}
 
 	T pop()

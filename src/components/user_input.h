@@ -1,5 +1,4 @@
 #pragma once
-
 #include "component.h"
 #include "output.h"
 #include "input.h"
@@ -10,11 +9,11 @@ class UserInput :
 	public Component
 {
 public:
-	UserInput(Board* board, Link** outputs, const unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
-	UserInput(Board* board, Output* outputs, const unsigned int outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
+	UserInput(Board* board, Link** outputs, const size_t outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
+	UserInput(Board* board, Output* outputs, const size_t outputCount) : Component(board, nullptr, outputs, 0, outputCount) { }
 
 	enum InputEvent { Cont, Pulse, Max };
-	
+
 	void compute() override { }
 
 	void triggerUserInput(bool* state, const InputEvent inputEvent) {
@@ -22,7 +21,7 @@ public:
 		pending = new bool[outputCount];
 		memcpy(pending, state, outputCount * sizeof(bool));
 		pendingInput = inputEvent;
-		
+
 		if (!subscribed) {
 			board->tickEvent += tickEvent;
 			subscribed = true;
