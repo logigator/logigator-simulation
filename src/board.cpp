@@ -8,6 +8,7 @@
 #include "spinlock_barrier.h"
 #include "events.h"
 #include "output.h"
+#include <stddef.h>
 
 Board::Board() = default;
 
@@ -186,7 +187,7 @@ void Board::stop()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(const uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t threadCount, const bool synchronized)
+void Board::start(uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t threadCount, const bool synchronized)
 {
 	if (this->currentState != Board::Stopped)
 		return;

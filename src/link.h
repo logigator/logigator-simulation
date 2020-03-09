@@ -1,4 +1,5 @@
 #pragma once
+#include <stddef.h>
 
 class Input;
 class Output;
