@@ -23,7 +23,8 @@ public:
 			{
 				outputs[0].setPowered(true);
 				outputs[1].setPowered(false);
-			} else if(inputs[2].getPowered())
+			}
+			else if(inputs[2].getPowered())
 			{
 				outputs[0].setPowered(false);
 				outputs[1].setPowered(true);

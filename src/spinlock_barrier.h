@@ -7,7 +7,7 @@
 class SpinlockBarrier
 {
 public:
-	explicit SpinlockBarrier(const unsigned int count) :
+	explicit SpinlockBarrier(const uint_fast32_t count) :
 		m_count(count), m_generation(0),
 		m_count_reset_value(count),
 		m_post_phase_action(nullptr),
@@ -16,7 +16,7 @@ public:
 	{
 	}
 
-	explicit SpinlockBarrier(const unsigned int count, std::function<void()> post_phase_action) :
+	explicit SpinlockBarrier(const uint_fast32_t count, std::function<void()> post_phase_action) :
 		m_count(count), m_generation(0),
 		m_count_reset_value(count),
 		m_post_phase_action(post_phase_action),
@@ -25,7 +25,7 @@ public:
 	{
 	}
 
-	explicit SpinlockBarrier(const unsigned int count, std::function<void()> post_phase_action, const unsigned int post_phase_action_interval) :
+	explicit SpinlockBarrier(const uint_fast32_t count, std::function<void()> post_phase_action, const uint_fast32_t post_phase_action_interval) :
 		m_count(count), m_generation(0),
 		m_count_reset_value(count),
 		m_post_phase_action(post_phase_action),
@@ -61,16 +61,16 @@ public:
 			std::this_thread::yield();
 	}
 
-	void setStageCount(const unsigned int count)
+	void setStageCount(const uint_fast32_t count)
 	{
 		m_count_reset_value = count;
 		m_count = count;
 	}
 private:
-	std::atomic<unsigned int> m_count;
-	std::atomic<unsigned int> m_generation;
-	unsigned int m_count_reset_value;
+	std::atomic<uint_fast32_t> m_count;
+	std::atomic<uint_fast32_t> m_generation;
+	uint_fast32_t m_count_reset_value;
 	std::function<void()> m_post_phase_action;
-	unsigned int m_post_phase_action_interval;
-	unsigned int m_post_phase_action_count;
+	uint_fast32_t m_post_phase_action_interval;
+	uint_fast32_t m_post_phase_action_count;
 };

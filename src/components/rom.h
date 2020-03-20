@@ -13,25 +13,25 @@ public:
 	ROM(Board* board,
 		Input* inputs,
 		Output* outputs,
-		const unsigned int inputCount,
-		const unsigned int outputCount)
+		const size_t inputCount,
+		const size_t outputCount)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
+		this->data = new unsigned char[static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT))] { 0 };
 	}
 
 	ROM(Board* board,
 		Input* inputs,
 		Output* outputs,
-		const unsigned int inputCount,
-		const unsigned int outputCount,
-		const unsigned int wordCount,
+		const size_t inputCount,
+		const size_t outputCount,
+		const size_t wordCount,
 		const unsigned char* data)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
+		this->data = new unsigned char[static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT))] { 0 };
 
-		for (unsigned int i = 0; i < wordCount; i++)
+		for (size_t i = 0; i < wordCount; i++)
 		{
 			this->data[i] = data[i];
 		}
@@ -40,25 +40,25 @@ public:
 	ROM(Board* board,
 		Link** inputs,
 		Link** outputs,
-		unsigned int inputCount,
-		unsigned int outputCount)
+		const size_t inputCount,
+		const size_t outputCount)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
+		this->data = new unsigned char[static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT))] { 0 };
 	}
 
 	ROM(Board* board,
 		Link** inputs,
 		Link** outputs,
-		const unsigned int inputCount,
-		const unsigned int outputCount,
-		const unsigned int wordCount,
+		const size_t inputCount,
+		const size_t outputCount,
+		const size_t wordCount,
 		const unsigned char* data)
 		: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[(long)ceil(outputCount * pow(2, inputCount) / CHAR_BIT)] { 0 };
+		this->data = new unsigned char[static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT))] { 0 };
 		
-		for (unsigned int i = 0; i < wordCount; i++)
+		for (size_t i = 0; i < wordCount; i++)
 		{
 			this->data[i] = data[i];
 		}
@@ -69,16 +69,16 @@ public:
 	}
 
 	void compute() override {
-		unsigned long position = 0;
+		size_t position = 0;
 
-		for (unsigned int i = 0; i < this->inputCount; i++) {
+		for (size_t i = 0; i < this->inputCount; i++) {
 			position |= this->inputs[i].getPowered() << i;
 		}
 		position *= outputCount;
 		
-		for (unsigned int i = 0; i < this->outputCount; i++)
+		for (size_t i = 0; i < this->outputCount; i++)
 		{
-			this->outputs[i].setPowered((unsigned char)(data[(position + i) / CHAR_BIT] << (CHAR_BIT - 1 - (position + i) % 8)) >> (CHAR_BIT - 1));
+			this->outputs[i].setPowered(static_cast<unsigned char>(data[(position + i) / CHAR_BIT] << (CHAR_BIT - 1 - (position + i) % 8)) >> (CHAR_BIT - 1));
 		}
 	}
 private:

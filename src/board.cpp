@@ -8,6 +8,7 @@
 #include "spinlock_barrier.h"
 #include "events.h"
 #include "output.h"
+#include <stddef.h>
 
 Board::Board() = default;
 
@@ -15,7 +16,7 @@ Board::~Board()
 {
 	stop();
 
-	for (unsigned int i = 0; i < componentCount; i++) {
+	for (size_t i = 0; i < componentCount; i++) {
 		delete components[i];
 	}
 
@@ -27,7 +28,7 @@ Board::~Board()
 
     #ifndef __EMSCRIPTEN__
 
-	for (unsigned int i = 0; i < threadCount; i++) {
+	for (size_t i = 0; i < threadCount; i++) {
 		delete threads[i];
 	}
 	delete[] threads;
@@ -42,7 +43,7 @@ Board::~Board()
 
 #ifdef __EMSCRIPTEN__
 
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
+void Board::init(Component** components, Link* links, const size_t componentCount, const size_t linkCount)
 {
 	if (currentState != Board::Uninitialized)
 		return;
@@ -57,14 +58,14 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	else
 		this->linkStates = new bool[0];
 	    
-	for (unsigned int i = 0; i < linkCount; i++) {
+	for (size_t i = 0; i < linkCount; i++) {
 		links[i].powered = &this->linkStates[i];
 	}
 
 	currentState = Board::Stopped;
 	lastCapture = std::chrono::high_resolution_clock::now();
 
-	for (unsigned int i = 0; i < componentCount; i++)
+	for (size_t i = 0; i < componentCount; i++)
 	{
 		components[i]->init();
 	}
@@ -77,7 +78,7 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 #else
 
-void Board::init(Component** components, Link* links, const unsigned int componentCount, const unsigned int linkCount)
+void Board::init(Component** components, Link* links, const size_t componentCount, const size_t linkCount)
 {
 	if (currentState != Board::Uninitialized)
 		return;
@@ -92,7 +93,7 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	else
 		this->linkStates = new bool[0];
 
-	for (unsigned int i = 0; i < linkCount; i++)
+	for (size_t i = 0; i < linkCount; i++)
 	{
 		links[i].powered = &this->linkStates[i];
 	}
@@ -100,7 +101,7 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 	currentState = Board::Stopped;
 	lastCapture = std::chrono::high_resolution_clock::now();
 
-	for (unsigned int i = 0; i < componentCount; i++)
+	for (size_t i = 0; i < componentCount; i++)
 	{
 		components[i]->init();
 	}
@@ -124,12 +125,12 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 		const auto diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
-			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
+			currentSpeed = (tick - lastCaptureTick) * static_cast<uint_fast64_t>(10e8) / diff;
 			lastCapture = timestamp;
 			lastCaptureTick = tick;
 		}
 
-		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+		if (static_cast<uint_fast64_t>((timestamp - started).count()) > this->timeout) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -143,12 +144,12 @@ void Board::init(Component** components, Link* links, const unsigned int compone
 
 #endif
 
-unsigned int Board::getNextComponentIndex()
+size_t Board::getNextComponentIndex()
 {
 	return componentIndex++;
 }
 
-unsigned int Board::getThreadCount() const
+size_t Board::getThreadCount() const
 {
 	return threadCount;
 }
@@ -168,7 +169,7 @@ Board::State Board::getCurrentState() const
 	return currentState;
 }
 
-unsigned long long int Board::getCurrentTick() const
+uint_fast64_t Board::getCurrentTick() const
 {
 	return tick;
 }
@@ -179,21 +180,21 @@ void Board::stop()
 		return;
 
 	currentState = Board::Stopping;
-	for (unsigned i = 0; i < threadCount; i++) {
+	for (size_t i = 0; i < threadCount; i++) {
 		threads[i]->join();
 	}
 }
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int threadCount, const bool synchronized)
+void Board::start(uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t threadCount, const bool synchronized)
 {
 	if (this->currentState != Board::Stopped)
 		return;
 
 	this->currentState = Board::Running;
 	this->started = std::chrono::high_resolution_clock::now();
-	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
+	this->timeout = static_cast<uint_fast64_t>(ms) * static_cast<uint_fast64_t>(10e5);
 	this->cyclesLeft = cyclesLeft;
 
 	if (this->cyclesLeft <= 0 || this->timeout <= 0)
@@ -204,12 +205,12 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 
 	FastStack<Component*> compFlags;
 	while (true) {
-		for (unsigned long i = 0; i < this->readBuffer->count(); i++) {
+		for (size_t i = 0; i < this->readBuffer->count(); i++) {
 			const auto result = std::any_of(this->readBuffer->operator[](i)->outputs, this->readBuffer->operator[](i)->outputs + this->readBuffer->operator[](i)->outputCount, [](Output* x) { return x->getPowered(); });
 			if (*this->readBuffer->operator[](i)->powered != result)
 			{
 				*this->readBuffer->operator[](i)->powered = result;
-				for (unsigned int j = 0; j < this->readBuffer->operator[](i)->inputCount; j++)
+				for (size_t j = 0; j < this->readBuffer->operator[](i)->inputCount; j++)
 				{
 					compFlags.push(this->readBuffer->operator[](i)->inputs[j]->getComponent());
 				}
@@ -234,12 +235,12 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 
 		const auto diff = (timestamp - lastCapture).count();
 		if (diff > 10e8) {
-			currentSpeed = ((tick - lastCaptureTick) * (unsigned long)10e8) / diff;
+			currentSpeed = (tick - lastCaptureTick) * static_cast<uint_fast64_t>(10e8) / diff;
 			lastCapture = timestamp;
 			lastCaptureTick = tick;
 		}
 
-		if ((unsigned long long)(timestamp - started).count() > this->timeout) {
+		if (static_cast<uint_fast64_t>((timestamp - started).count()) > this->timeout) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -253,14 +254,14 @@ void Board::start(unsigned long long cyclesLeft, unsigned long ms, unsigned int 
 
 #else
 
-void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, const unsigned int threadCount, const bool synchronized)
+void Board::start(const uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t threadCount, const bool synchronized)
 {
 	if (currentState != Board::Stopped)
 		return;
 
 	this->started = std::chrono::high_resolution_clock::now();
 	this->cyclesLeft = cyclesLeft;
-	this->timeout = (unsigned long long)ms * (unsigned long long)10e5;
+	this->timeout = static_cast<uint_fast64_t>(ms) * static_cast<uint_fast64_t>(10e5);
 	this->currentState = Board::Running;
 
 	if (this->cyclesLeft <= 0 || this->timeout <= 0)
@@ -269,7 +270,7 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 		return;
 	}
 
-	for (unsigned int i = 0; i < this->threadCount; i++)
+	for (size_t i = 0; i < this->threadCount; i++)
 	{
 		if (threads[i] != nullptr)
 			delete threads[i];
@@ -279,20 +280,20 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 	this->threadCount = threadCount;
 	this->barrier->setStageCount(threadCount);
 
-	for (unsigned int i = 0; i < threadCount; i++) {
-		threads[i] = new std::thread([this](const int id) {
+	for (size_t i = 0; i < threadCount; i++) {
+		threads[i] = new std::thread([this](const size_t id) {
 			FastStack<Component*> compFlags;
 			
 			while (true) {
 				if (currentState == Board::Stopped)
 					return;
 
-				for (unsigned long i = id; i < this->readBuffer->count(); i += this->threadCount) {
+				for (size_t i = id; i < this->readBuffer->count(); i += this->threadCount) {
 					const auto result = std::any_of(this->readBuffer->operator[](i)->outputs, this->readBuffer->operator[](i)->outputs + this->readBuffer->operator[](i)->outputCount, [](Output* x) { return x->getPowered(); });
 					if (*this->readBuffer->operator[](i)->powered != result)
 					{
 						*this->readBuffer->operator[](i)->powered = result;
-						for (unsigned int j = 0; j < this->readBuffer->operator[](i)->inputCount; j++)
+						for (size_t j = 0; j < this->readBuffer->operator[](i)->inputCount; j++)
 						{
 							compFlags.push(this->readBuffer->operator[](i)->inputs[j]->getComponent());
 						}
@@ -313,7 +314,7 @@ void Board::start(const unsigned long long cyclesLeft, const unsigned long ms, c
 
 	if (synchronized)
 	{
-		for (unsigned i = 0; i < threadCount; i++)
+		for (size_t i = 0; i < threadCount; i++)
 		{
 			threads[i]->join();
 		}
