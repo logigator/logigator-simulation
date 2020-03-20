@@ -1,6 +1,6 @@
 {
   "name": "@logigator/logigator-simulation",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Multi-Threaded Simulator for Logic Circuits as Node.JS Native C++ or WebAssembly Module.",
   "main": "index.js",
   "homepage": "https://github.com/logigator/logigator-simulation#readme",
