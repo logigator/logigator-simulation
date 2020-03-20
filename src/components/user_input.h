@@ -17,6 +17,7 @@ public:
 	void compute() override { }
 
 	void triggerUserInput(bool* state, const InputEvent inputEvent) {
+		pendingInput = InputEvent::Max;
 		delete[] pending;
 		pending = new bool[outputCount];
 		memcpy(pending, state, outputCount * sizeof(bool));
