@@ -28,6 +28,7 @@
 		"src/components/half_addr.h",
 		"src/components/full_addr.h",
 		"src/components/jk_ff.h",
+		"src/components/led_matrix.h",
 		"src/components/not.h",
 		"src/components/or.h",
 		"src/components/rom.h",

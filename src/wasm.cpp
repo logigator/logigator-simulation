@@ -18,6 +18,7 @@
 #include "d_ff.h"
 #include "jk_ff.h"
 #include "sr_ff.h"
+#include "led_matrix.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -98,7 +99,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 	auto* inputs = reinterpret_cast<uint32_t*>(inputsPtr);
 	auto* outputs = reinterpret_cast<uint32_t*>(outputsPtr);
 	auto* ops = reinterpret_cast<uint32_t*>(opsPtr);
-	
+
 	auto** componentInputs = new Link*[inputCount];
 
 	for (unsigned int j = 0; j < inputCount; j++) {
@@ -111,57 +112,62 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 		componentOutputs[j] = &links[(unsigned int)outputs[j]];
 	}
 
-	if(type >= 200 && type < 300) {
-		components[index] = new UserInput(board, componentOutputs, outputCount);
-	} else {
-		unsigned char* data;
-		switch (type)
-		{
-			case 1:
-				components[index] = new NOT(board, componentInputs, componentOutputs);
-				break;
-			case 2:
-				components[index] = new AND(board, componentInputs, componentOutputs, inputCount);
-				break;
-			case 3:
-				components[index] = new OR(board, componentInputs, componentOutputs, inputCount);
-				break;
-			case 4:
-				components[index] = new XOR(board, componentInputs, componentOutputs, inputCount);
-				break;
-			case 5:
-				components[index] = new DELAY(board, componentInputs, componentOutputs);
-				break;
-			case 6:
-				if (opCount > 0) components[index] = new CLK(board, componentInputs, componentOutputs, ops[0]);
-				break;
-			case 10:
-				components[index] = new HalfAddr(board, componentInputs, componentOutputs);
-				break;
-			case 11:
-				components[index] = new FullAddr(board, componentInputs, componentOutputs);
-				break;
-			case 12:
-				data = new unsigned char[opCount];
-				for (unsigned int i = 0; i < opCount; i++)
-				{
-					data[i] = static_cast<unsigned char>(ops[i]);
-				}
-				components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
-				delete[] data;
-				break;
-			case 13:
-				components[index] = new D_FF(board, componentInputs, componentOutputs);
-				break;
-			case 14:
-				components[index] = new JK_FF(board, componentInputs, componentOutputs);
-				break;
-			case 15:
-				components[index] = new SR_FF(board, componentInputs, componentOutputs);
-				break;
-			default:
-				return 1;
-		}
+	unsigned char* data;
+	switch (type)
+	{
+		case 1:
+			components[index] = new NOT(board, componentInputs, componentOutputs);
+			break;
+		case 2:
+			components[index] = new AND(board, componentInputs, componentOutputs, inputCount);
+			break;
+		case 3:
+			components[index] = new OR(board, componentInputs, componentOutputs, inputCount);
+			break;
+		case 4:
+			components[index] = new XOR(board, componentInputs, componentOutputs, inputCount);
+			break;
+		case 5:
+			components[index] = new DELAY(board, componentInputs, componentOutputs);
+			break;
+		case 6:
+			if (opCount > 0)
+				components[index] = new CLK(board, componentInputs, componentOutputs, ops[0]);
+			break;
+		case 10:
+			components[index] = new HalfAddr(board, componentInputs, componentOutputs);
+			break;
+		case 11:
+			components[index] = new FullAddr(board, componentInputs, componentOutputs);
+			break;
+		case 12:
+			data = new unsigned char[opCount];
+			for (unsigned int i = 0; i < opCount; i++)
+			{
+				data[i] = static_cast<unsigned char>(ops[i]);
+			}
+			components[index] = new ROM(board, componentInputs, componentOutputs, inputCount, outputCount, opCount, data);
+			delete[] data;
+			break;
+		case 13:
+			components[index] = new D_FF(board, componentInputs, componentOutputs);
+			break;
+		case 14:
+			components[index] = new JK_FF(board, componentInputs, componentOutputs);
+			break;
+		case 15:
+			components[index] = new SR_FF(board, componentInputs, componentOutputs);
+			break;
+		case 204:
+			if (opCount > 0)
+				components[index] = new LEDMatrix(board, componentInputs, componentOutputs, ops[0] > 4 ? 8 : 4, outputCount);
+			break;
+		default:
+			if (type >= 200 && type < 300) {
+            	components[index] = new UserInput(board, componentOutputs, outputCount);
+            	break;
+            }
+            return 1;
 	}
 
 	return 0;
@@ -209,7 +215,7 @@ uintptr_t getComponents() {
 	uint_fast32_t stateIndex = 0;
 	for (size_t i = 0; i < board->componentCount; i++) {
 		Component* component = board->getComponents()[i];
-		
+
 		for (int j = 0; j < component->getInputCount(); j++) {
 			states[stateIndex++] = (uint8_t)component->getInputs()[j].getPowered();
 		}

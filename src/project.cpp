@@ -21,6 +21,7 @@
 #include "d_ff.h"
 #include "jk_ff.h"
 #include "sr_ff.h"
+#include "led_matrix.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -75,69 +76,77 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 			{
 				ops = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("ops").ToLocalChecked()).ToLocalChecked());
 			}
-			
-			if (componentType >= 200 && componentType < 300) {
-				components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
-			}
-			else {
-				unsigned char* data;
-				v8::Local<v8::Array> v8Data;
-				switch (componentType)
-				{
-					case 1:
-						components[i] = new NOT(board, componentInputs, componentOutputs);
-						break;
-					case 2:
-						components[i] = new AND(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-						break;
-					case 3:
-						components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-						break;
-					case 4:
-						components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
-						break;
-					case 5:
-						components[i] = new DELAY(board, componentInputs, componentOutputs);
-						break;
-					case 6:
-						if (ops->Length() > 0) components[i] = new CLK(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust());
-						break;
-					case 10:
-						components[i] = new HalfAddr(board, componentInputs, componentOutputs);
-						break;
-					case 11:
-						components[i] = new FullAddr(board, componentInputs, componentOutputs);
-						break;
-					case 12:
-						v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
-						data = new unsigned char[v8Data->Length()];
-						for (uint_fast32_t j = 0; j < v8Data->Length(); j++)
-						{
-							data[j] = static_cast<unsigned char>(Nan::To<uint32_t>(Nan::Get(v8Data, i).ToLocalChecked()).FromJust());
-						}
-						components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
-						delete[] data;
-						break;
-					case 13:
-						components[i] = new D_FF(board, componentInputs, componentOutputs);
-						break;
-					case 14:
-						components[i] = new JK_FF(board, componentInputs, componentOutputs);
-						break;
-					case 15:
-						components[i] = new SR_FF(board, componentInputs, componentOutputs);
-						break;
-					default:
-						Nan::ThrowTypeError((std::string("Error: Component '") + std::to_string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
-						return;
-				}
+
+			unsigned char* data;
+			v8::Local<v8::Array> v8Data;
+			switch (componentType)
+			{
+				case 1:
+					components[i] = new NOT(board, componentInputs, componentOutputs);
+					break;
+				case 2:
+					components[i] = new AND(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+					break;
+				case 3:
+					components[i] = new OR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+					break;
+				case 4:
+					components[i] = new XOR(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+					break;
+				case 5:
+					components[i] = new DELAY(board, componentInputs, componentOutputs);
+					break;
+				case 6:
+					if (ops->Length() > 0)
+						components[i] = new CLK(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust());
+					break;
+				case 10:
+					components[i] = new HalfAddr(board, componentInputs, componentOutputs);
+					break;
+				case 11:
+					components[i] = new FullAddr(board, componentInputs, componentOutputs);
+					break;
+				case 12:
+					v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
+					data = new unsigned char[v8Data->Length()];
+					for (uint_fast32_t j = 0; j < v8Data->Length(); j++)
+					{
+						data[j] = static_cast<unsigned char>(Nan::To<uint32_t>(Nan::Get(v8Data, i).ToLocalChecked()).FromJust());
+					}
+					components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
+					delete[] data;
+					break;
+				case 13:
+					components[i] = new D_FF(board, componentInputs, componentOutputs);
+					break;
+				case 14:
+					components[i] = new JK_FF(board, componentInputs, componentOutputs);
+					break;
+				case 15:
+					components[i] = new SR_FF(board, componentInputs, componentOutputs);
+					break;
+				case 200:
+					components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
+					break;
+				case 201:
+					components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
+					break;
+				case 204:
+					if (ops->Length() > 0)
+						components[i] = new LEDMatrix(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust() > 4 ? 8 : 4, v8ComponentOutputs->Length());
+					break;
+				default:
+					if (componentType >= 200 && componentType < 300)
+                   		break;
+					Nan::ThrowTypeError((std::string("Error: Component '") + std::to_string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
+					return;
 			}
 		}
 	}
 	else {
 		components = new Component*[0];
 	}
-	
+
 	board->init(components, links, componentCount, linkCount);
 }
 
@@ -160,11 +169,11 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		Nan::ThrowError("Board is not initialized yet.");
 		return;
 	}
-	
+
 	auto threadCount = 1;
 	auto ticks = UINT64_MAX;
 	auto timeout = UINT64_MAX;
-	
+
 	if (args.Length() > 0) {
 		if (!args[0]->IsNumber() || Nan::To<uint32_t>(args[0]).FromJust() <= 0) {
 			Nan::ThrowTypeError("Thread count is invalid.");
@@ -186,7 +195,7 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		}
 		timeout = Nan::To<int64_t>(args[2]).FromJust();
 	}
-	
+
 	if (args.Length() > 3 && args[3]->IsBoolean() && Nan::To<bool>(args[3]).FromJust())
 	{
 		board->start(ticks, timeout, threadCount, true);
@@ -215,7 +224,7 @@ void getStatus(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	}
 
 	const auto obj = Nan::New<v8::Object>();
-	
+
 	Nan::Set(obj, Nan::New("currentSpeed").ToLocalChecked(), Nan::New(static_cast<double>(board->currentSpeed)));
 	Nan::Set(obj, Nan::New("currentState").ToLocalChecked(), Nan::New(board->getCurrentState()));
 	Nan::Set(obj, Nan::New("threadCount").ToLocalChecked(), Nan::New(static_cast<uint32_t>(board->getThreadCount())));
@@ -287,7 +296,7 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		Nan::ThrowTypeError("Unrecognized input event.");
 		return;
 	}
-	
+
 	auto* userInput = reinterpret_cast<UserInput*>(board->getComponents()[componentIndex]);
 	const auto stateArray = v8::Local<v8::Array>::Cast(args[2]);
 
@@ -299,7 +308,7 @@ void triggerInput(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 	for (uint_fast32_t i = 0; i < stateArray->Length(); i++) {
 		state[i] = Nan::To<bool>(Nan::Get(stateArray, i).ToLocalChecked()).FromMaybe(false);
 	}
-	
+
 	userInput->triggerUserInput(state, inputEvent);
 	delete[] state;
 }
