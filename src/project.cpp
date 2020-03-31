@@ -125,19 +125,15 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 				case 15:
 					components[i] = new SR_FF(board, componentInputs, componentOutputs);
 					break;
-				case 200:
-					components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
-					break;
-				case 201:
-					components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
-					break;
 				case 204:
 					if (ops->Length() > 0)
 						components[i] = new LEDMatrix(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust() > 4 ? 8 : 4, v8ComponentOutputs->Length());
 					break;
 				default:
-					if (componentType >= 200 && componentType < 300)
-                   		break;
+					if (componentType >= 200 && componentType < 300) {
+						components[i] = new UserInput(board, componentOutputs, v8ComponentOutputs->Length());
+						break;
+					}
 					Nan::ThrowTypeError((std::string("Error: Component '") + std::to_string(componentType) + std::string("' (") + std::to_string(i) + std::string(") is of no valid type!")).c_str());
 					return;
 			}
