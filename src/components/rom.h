@@ -72,7 +72,7 @@ public:
 		size_t position = 0;
 
 		for (size_t i = 0; i < this->inputCount; i++) {
-			position |= this->inputs[i].getPowered() << i;
+			position |= static_cast<size_t>(this->inputs[i].getPowered()) << i;
 		}
 		position *= outputCount;
 		

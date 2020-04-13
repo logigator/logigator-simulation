@@ -24,34 +24,30 @@ public:
 	void compute() override { }
 
 	void triggerUserInput(bool* state, const InputEvent inputEvent) {
-		mutex.lock();
 		memcpy(pendingData, state, outputCount * sizeof(bool));
 		pendingInput = inputEvent;
 		pending = true;
 
-		if (!subscribed) {
+		if (!subscribed || subscribed < this->board->getCurrentTick() - 1) {
 			board->tickEvent += tickEvent;
-			subscribed = true;
+			subscribed = this->board->getCurrentTick();
 		}
-		mutex.unlock();
 	}
 private:
-	bool subscribed = false;
+	uint_fast64_t subscribed = 0;
 	bool* pendingData = new bool[outputCount];
 	bool pending = false;
 	InputEvent pendingInput = InputEvent::Max;
-	std::mutex mutex;
 
 	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
-		mutex.lock();
-		if (pendingInput == InputEvent::Cont)
+		if (pendingInput == InputEvent::Cont && pending)
 		{
 			for (unsigned int i = 0; i < outputCount; i++) {
 				this->outputs[i].setPowered(pendingData[i]);
 			}
 			board->tickEvent -= tickEvent;
 			pending = false;
-			subscribed = false;
+			subscribed = 0;
 		}
 		else if (pendingInput == InputEvent::Pulse)
 		{
@@ -68,9 +64,8 @@ private:
 					this->outputs[i].setPowered(false);
 				}
 				board->tickEvent -= tickEvent;
-				subscribed = false;
+				subscribed = 0;
 			}
 		}
-		mutex.unlock();
 	});
 };
