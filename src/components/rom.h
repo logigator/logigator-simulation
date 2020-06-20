@@ -29,9 +29,10 @@ public:
 		const unsigned char* data)
 	: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT))] { 0 };
+		size_t size = static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT));
+		this->data = new unsigned char[size] { 0 };
 
-		for (size_t i = 0; i < wordCount; i++)
+		for (size_t i = 0; i < wordCount && i < size; i++)
 		{
 			this->data[i] = data[i];
 		}
@@ -56,19 +57,22 @@ public:
 		const unsigned char* data)
 		: Component(board, inputs, outputs, inputCount, outputCount)
 	{
-		this->data = new unsigned char[static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT))] { 0 };
+		size_t size = static_cast<size_t>(ceil(outputCount * pow(2, inputCount) / CHAR_BIT));
+		this->data = new unsigned char[size] { 0 };
 		
-		for (size_t i = 0; i < wordCount; i++)
+		for (size_t i = 0; i < wordCount && i < size; i++)
 		{
 			this->data[i] = data[i];
 		}
 	}
 
-	~ROM() {
+	~ROM()
+	{
 		delete[] data;
 	}
 
-	void compute() override {
+	void compute() override
+	{
 		size_t position = 0;
 
 		for (size_t i = 0; i < this->inputCount; i++) {
@@ -81,6 +85,12 @@ public:
 			this->outputs[i].setPowered(static_cast<unsigned char>(data[(position + i) / CHAR_BIT] << (CHAR_BIT - 1 - (position + i) % 8)) >> (CHAR_BIT - 1));
 		}
 	}
+
+	void init() override
+	{
+		this->compute();
+	}
+
 private:
 	unsigned char* data;
 };

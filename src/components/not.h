@@ -16,7 +16,8 @@ public:
 		outputs[0].setPowered(true);
 	}
 	
-	void compute() override {
+	void compute() override
+	{
 		outputs[0].setPowered(!inputs[0].getPowered());
 	}
 };
