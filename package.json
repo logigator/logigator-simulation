@@ -33,10 +33,10 @@
   "license": "MIT",
   "gypfile": true,
   "devDependencies": {
-    "node-gyp": "^6.1.0"
+    "node-gyp": "^7.1.2"
   },
   "dependencies": {
-    "nan": "^2.14.0",
+    "nan": "^2.14.2",
     "run-script-os": "^1.1.1"
   }
 }
