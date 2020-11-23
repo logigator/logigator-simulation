@@ -18,13 +18,14 @@ public:
 
 	void compute() override
 	{
-		if (inputs[1].getPowered())
+		if (inputs[1].getPowered() && !prevClk)
 		{
 			outputs[0].setPowered(inputs[0].getPowered());
 			outputs[1].setPowered(!inputs[0].getPowered());
 		}
+		prevClk = inputs[1].getPowered();
 	}
 
 private:
-
+	bool prevClk = false;
 };

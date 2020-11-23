@@ -168,6 +168,7 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | 13 | D Flip-Flop | 2 | 2 | x |
 | 14 | JK Flip-Flop | 3 | 2 | x |
 | 15 | SR Flip-Flop | 3 | 2 | x |
+| 16 | Random Number Generator | 1 | 1 - 2^32 | x |
 | 200 | User Input | 0 | 1 - 2^32 | x |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
