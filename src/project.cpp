@@ -24,6 +24,7 @@
 #include "sr_ff.h"
 #include "led_matrix.h"
 #include "rng.h"
+#include "ram.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -131,6 +132,10 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 					break;
 				case 16:
 					components[i] = new RNG(board, componentInputs, componentOutputs, v8ComponentOutputs->Length());
+					break;
+				case 17:
+					if (v8ComponentInputs->Length() - 2 >= v8ComponentOutputs->Length())
+						components[i] = new RAM(board, componentInputs, componentOutputs, v8ComponentInputs->Length() - v8ComponentOutputs->Length() - 2, v8ComponentOutputs->Length());
 					break;
 				case 204:
 					if (ops->Length() > 0)

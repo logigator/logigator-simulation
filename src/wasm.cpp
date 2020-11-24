@@ -21,6 +21,7 @@
 #include "sr_ff.h"
 #include "led_matrix.h"
 #include "rng.h"
+#include "ram.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -163,6 +164,10 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 			break;
 		case 16:
 			components[index] = new RNG(board, componentInputs, componentOutputs, outputCount);
+			break;
+		case 17:
+			if (inputCount - 2 >= outputCount)
+				components[index] = new RAM(board, componentInputs, componentOutputs, inputCount - outputCount - 2, outputCount);
 			break;
 		case 204:
 			if (opCount > 0)

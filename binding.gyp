@@ -31,6 +31,7 @@
 		"src/components/led_matrix.h",
 		"src/components/not.h",
 		"src/components/or.h",
+		"src/components/ram.h",
 		"src/components/rng.h",
 		"src/components/rom.h",
 		"src/components/sr_ff.h",
