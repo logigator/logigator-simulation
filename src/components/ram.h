@@ -30,6 +30,8 @@ public:
 	: Component(board, inputs, outputs, wordSize + addressSize + 2, wordSize)
 	{
 		this->data = new unsigned char[static_cast<size_t>(ceil(wordSize * pow(2, addressSize) / CHAR_BIT))] { 0 };
+		this->wordSize = wordSize;
+		this->addressSize = addressSize;
 	}
 
 	~RAM()
@@ -46,22 +48,23 @@ public:
 			for (size_t i = 0; i < this->addressSize; i++) {
 				position |= static_cast<size_t>(this->inputs[i].getPowered()) << i;
 			}
-			position *= outputCount;
+			position *= this->wordSize;
 			
 			if (this->inputs[this->inputCount - 2].getPowered())
 			{
 				for (size_t i = 0; i < this->wordSize; i++)
 				{
-					this->outputs[i].setPowered((this->data[(position + i) / CHAR_BIT] >> (position + i) % CHAR_BIT) % 2);
+					const auto pos = position + i;
+					const auto offset = pos % CHAR_BIT;
+					this->data[pos / CHAR_BIT] = (this->data[pos / CHAR_BIT] & ~(1 << offset)) | this->inputs[i + addressSize].getPowered() << offset;
+					this->outputs[i].setPowered(this->inputs[i + addressSize].getPowered());
 				}
 			}
 			else
 			{
 				for (size_t i = 0; i < this->wordSize; i++)
 				{
-					const auto pos = position + i;
-					const auto offset = pos % CHAR_BIT;
-					this->data[pos / CHAR_BIT] = (this->data[pos / CHAR_BIT] & ~(1 << offset)) | this->inputs[i].getPowered() << offset;
+					this->outputs[i].setPowered((this->data[(position + i) / CHAR_BIT] >> (position + i) % CHAR_BIT) % 2);
 				}
 			}
 		}
