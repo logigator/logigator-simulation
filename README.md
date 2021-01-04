@@ -160,7 +160,7 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | 2 | AND | 2 - 2^32 | 1 | x |
 | 3 | OR | 2 - 2^32 | 1 | x |
 | 4 | XOR | 2 - 2^32 | 1 | x |
-| 5 | DELAY | 1 | 1 | x | x |
+| 5 | DELAY | 1 | 1 | x |
 | 6 | CLOCK | 1 | 1 | [0] => Ticks between clock pulses |
 | 10 | Half Adder | 2 | 2 | x |
 | 11 | Full Adder | 3 | 2 | x |
@@ -170,6 +170,7 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | 15 | SR Flip-Flop | 3 | 2 | x |
 | 16 | Random Number Generator | 1 | 1 - 2^32 | x |
 | 17 | RAM | 1 - 16 | 1 - 64 | x |
+| 18 | Decoder | 1 - 32 | 1 - 2^32 | x |
 | 200 | User Input | 0 | 1 - 2^32 | x |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
