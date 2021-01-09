@@ -1,5 +1,6 @@
 #include <emscripten/bind.h>
 #include <string>
+#include <ctime>
 
 #include "board.h"
 #include "component.h"
@@ -19,6 +20,9 @@
 #include "jk_ff.h"
 #include "sr_ff.h"
 #include "led_matrix.h"
+#include "rng.h"
+#include "ram.h"
+#include "dec.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -74,6 +78,7 @@ int stop() {
 }
 
 int initBoard() {
+	std::srand(std::time(nullptr));
 	board->init(components, links, componentCount, linkCount);
 	return 0;
 }
@@ -157,6 +162,17 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 			break;
 		case 15:
 			components[index] = new SR_FF(board, componentInputs, componentOutputs);
+			break;
+		case 16:
+			components[index] = new RNG(board, componentInputs, componentOutputs, outputCount);
+			break;
+		case 17:
+			if (inputCount - 2 >= outputCount)
+				components[index] = new RAM(board, componentInputs, componentOutputs, inputCount - outputCount - 2, outputCount);
+			break;
+		case 18:
+			if (inputCount > 0)
+				components[index] = new DEC(board, componentInputs, componentOutputs, inputCount);
 			break;
 		case 204:
 			if (opCount > 0)

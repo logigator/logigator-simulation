@@ -2,6 +2,7 @@
 #include <thread>
 #include <string>
 #include <map>
+#include <ctime>
 #include <nan.h>
 #include "node.h"
 #include "board.h"
@@ -22,6 +23,9 @@
 #include "jk_ff.h"
 #include "sr_ff.h"
 #include "led_matrix.h"
+#include "rng.h"
+#include "ram.h"
+#include "dec.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -44,6 +48,8 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 		Nan::ThrowError("Invalid number of links.");
 		return;
 	}
+
+	std::srand(std::time(nullptr));
 
 	const uint_fast32_t linkCount = Nan::Get(obj, Nan::New("links").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();;
 	links = new Link[linkCount];
@@ -124,6 +130,17 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 					break;
 				case 15:
 					components[i] = new SR_FF(board, componentInputs, componentOutputs);
+					break;
+				case 16:
+					components[i] = new RNG(board, componentInputs, componentOutputs, v8ComponentOutputs->Length());
+					break;
+				case 17:
+					if (v8ComponentInputs->Length() - 2 >= v8ComponentOutputs->Length())
+						components[i] = new RAM(board, componentInputs, componentOutputs, v8ComponentInputs->Length() - v8ComponentOutputs->Length() - 2, v8ComponentOutputs->Length());
+					break;
+				case 18:
+					if (v8ComponentInputs->Length() > 0)
+						components[i] = new DEC(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 					break;
 				case 204:
 					if (ops->Length() > 0)
