@@ -130,12 +130,7 @@ void Board::init(Component** components, Link* links, const size_t componentCoun
 			lastCaptureTick = tick;
 		}
 
-		if (static_cast<uint_fast64_t>((timestamp - started).count()) > this->timeout) {
-			currentState = Board::Stopped;
-			return;
-		}
-
-		if (!--cyclesLeft || currentState == Board::Stopping) {
+		if (static_cast<uint_fast64_t>((timestamp - started).count()) > this->timeout || !--cyclesLeft) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -180,21 +175,31 @@ void Board::stop()
 		return;
 
 	currentState = Board::Stopping;
-	for (size_t i = 0; i < threadCount; i++) {
+	for (size_t i = 0; i < threadCount; i++)
+	{
 		threads[i]->join();
 	}
+	currentState = Board::Stopped;
+}
+
+void Board::resume()
+{
+	if (currentState != Board::Stopped)
+		return;
+	
+	this->start(this->cyclesLeft, this->timeout - (std::chrono::high_resolution_clock::now() - started).count(), this->threadCount, false);
 }
 
 #ifdef __EMSCRIPTEN__
 
-void Board::start(uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t threadCount, const bool synchronized)
+void Board::start(uint_fast64_t cyclesLeft, const uint_fast64_t timeout, const size_t threadCount, const bool synchronized)
 {
 	if (this->currentState != Board::Stopped)
 		return;
 
 	this->currentState = Board::Running;
 	this->started = std::chrono::high_resolution_clock::now();
-	this->timeout = static_cast<uint_fast64_t>(ms) * static_cast<uint_fast64_t>(10e5);
+	this->timeout = timeout;
 	this->cyclesLeft = cyclesLeft;
 
 	if (this->cyclesLeft <= 0 || this->timeout <= 0)
@@ -254,14 +259,14 @@ void Board::start(uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t
 
 #else
 
-void Board::start(const uint_fast64_t cyclesLeft, const uint_fast32_t ms, const size_t threadCount, const bool synchronized)
+void Board::start(const uint_fast64_t cyclesLeft, const uint_fast64_t timeout, const size_t threadCount, const bool synchronized)
 {
 	if (currentState != Board::Stopped)
 		return;
 
 	this->started = std::chrono::high_resolution_clock::now();
 	this->cyclesLeft = cyclesLeft;
-	this->timeout = static_cast<uint_fast64_t>(ms) * static_cast<uint_fast64_t>(10e5);
+	this->timeout = timeout;
 	this->currentState = Board::Running;
 
 	if (this->cyclesLeft <= 0 || this->timeout <= 0)
@@ -273,7 +278,10 @@ void Board::start(const uint_fast64_t cyclesLeft, const uint_fast32_t ms, const 
 	for (size_t i = 0; i < this->threadCount; i++)
 	{
 		if (threads[i] != nullptr)
+		{
+			threads[i]->join();
 			delete threads[i];
+		}
 	}
 	delete[] this->threads;
 	this->threads = new std::thread*[threadCount] { nullptr };
@@ -285,7 +293,7 @@ void Board::start(const uint_fast64_t cyclesLeft, const uint_fast32_t ms, const 
 			FastStack<Component*> compFlags;
 			
 			while (true) {
-				if (currentState == Board::Stopped)
+				if (currentState != Board::Running)
 					return;
 
 				for (size_t i = id; i < this->readBuffer->count(); i += this->threadCount) {

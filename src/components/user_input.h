@@ -5,6 +5,7 @@
 #include "events.h"
 #include "board.h"
 #include <mutex>
+#include <thread>
 
 class UserInput :
 	public Component
@@ -24,48 +25,60 @@ public:
 	void compute() override { }
 
 	void triggerUserInput(bool* state, const InputEvent inputEvent) {
-		memcpy(pendingData, state, outputCount * sizeof(bool));
-		pendingInput = inputEvent;
-		pending = true;
+		const auto prevState = this->board->getCurrentState();
 
-		if (!subscribed || subscribed < this->board->getCurrentTick() - 1) {
-			board->tickEvent += tickEvent;
-			subscribed = this->board->getCurrentTick();
+		if (prevState == Board::Uninitialized)
+			return;
+
+		if (prevState == Board::Stopping)
+		{
+			while(prevState != Board::Stopped)
+				std::this_thread::yield();
 		}
-	}
-private:
-	uint_fast64_t subscribed = 0;
-	bool* pendingData = new bool[outputCount];
-	bool pending = false;
-	InputEvent pendingInput = InputEvent::Max;
 
-	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
-		if (pendingInput == InputEvent::Cont && pending)
+		if (prevState == Board::Running)
+			this->board->stop();
+
+		if (inputEvent == InputEvent::Cont)
 		{
 			for (unsigned int i = 0; i < outputCount; i++) {
 				this->outputs[i].setPowered(pendingData[i]);
 			}
-			board->tickEvent -= tickEvent;
-			pending = false;
-			subscribed = 0;
 		}
-		else if (pendingInput == InputEvent::Pulse)
+		else if (inputEvent == InputEvent::Pulse)
 		{
-			if (pending)
-			{
-				for (unsigned int i = 0; i < outputCount; i++) {
-					this->outputs[i].setPowered(pendingData[i]);
-				}
-				pending = false;
+			memcpy(pendingData, state, outputCount * sizeof(bool));
+			pending = true;
+
+			if (!subscribed) {
+				board->tickEvent += tickEvent;
+				subscribed = true;
 			}
-			else
-			{
-				for (unsigned int i = 0; i < outputCount; i++) {
-					this->outputs[i].setPowered(false);
-				}
-				board->tickEvent -= tickEvent;
-				subscribed = 0;
+		}
+
+		if (prevState == Board::Running)
+			this->board->resume();
+	}
+private:
+	bool subscribed = false;
+	bool* pendingData = new bool[outputCount];
+	bool pending = false;
+
+	Events::EventHandler<>* tickEvent = new Events::EventHandler<>([this](Events::Emitter* e, Events::EventArgs& a) {
+		if (pending)
+		{
+			for (unsigned int i = 0; i < outputCount; i++) {
+				this->outputs[i].setPowered(pendingData[i]);
 			}
+			pending = false;
+		}
+		else
+		{
+			for (unsigned int i = 0; i < outputCount; i++) {
+				this->outputs[i].setPowered(false);
+			}
+			board->tickEvent -= tickEvent;
+			subscribed = false;
 		}
 	});
 };
