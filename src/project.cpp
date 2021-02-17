@@ -84,7 +84,6 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 			}
 
 			unsigned char* data;
-			v8::Local<v8::Array> v8Data;
 			switch (componentType)
 			{
 				case 1:
@@ -113,13 +112,12 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 					components[i] = new FullAddr(board, componentInputs, componentOutputs);
 					break;
 				case 12:
-					v8Data = v8::Local<v8::Array>::Cast(Nan::Get(v8Component, Nan::New("data").ToLocalChecked()).ToLocalChecked());
-					data = new unsigned char[v8Data->Length()];
-					for (uint_fast32_t j = 0; j < v8Data->Length(); j++)
+					data = new unsigned char[ops->Length()];
+					for (size_t j = 0; j < ops->Length(); j++)
 					{
-						data[j] = static_cast<unsigned char>(Nan::To<uint32_t>(Nan::Get(v8Data, i).ToLocalChecked()).FromJust());
+						data[j] = static_cast<unsigned char>(Nan::To<uint32_t>(Nan::Get(ops, j).ToLocalChecked()).FromJust());
 					}
-					components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), v8Data->Length() / v8ComponentOutputs->Length(), data);
+					components[i] = new ROM(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), v8ComponentOutputs->Length(), ops->Length(), data);
 					delete[] data;
 					break;
 				case 13:
