@@ -1,7 +1,6 @@
 #pragma once
 #include <atomic>
 #include <thread>
-#include <mutex>
 #include <functional>
 
 class SpinlockBarrier
@@ -44,7 +43,7 @@ public:
 			return;
 		}
 
-		const unsigned int gen = m_generation;
+		const auto gen = m_generation.load();
 		if (!--m_count)
 		{
 			if (m_post_phase_action != nullptr && !--m_post_phase_action_count) {
@@ -53,7 +52,7 @@ public:
 			}
 
 			m_count = m_count_reset_value;
-			m_generation = gen + 1;
+			m_generation += 1;
 			return;
 		}
 

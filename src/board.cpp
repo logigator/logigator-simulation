@@ -130,7 +130,7 @@ void Board::init(Component** components, Link* links, const size_t componentCoun
 			lastCaptureTick = tick;
 		}
 
-		if (static_cast<uint_fast64_t>((timestamp - started).count()) > this->timeout || !--cyclesLeft) {
+		if (static_cast<uint_fast64_t>((timestamp - started).count()) > this->timeout || !--cyclesLeft || currentState == Board::Stopping) {
 			currentState = Board::Stopped;
 			return;
 		}
@@ -294,7 +294,7 @@ void Board::start(const uint_fast64_t cyclesLeft, const uint_fast64_t timeout, c
 			FastStack<Component*> compFlags;
 			
 			while (true) {
-				if (currentState != Board::Running)
+				if (currentState == Board::Stopped)
 					return;
 
 				for (size_t i = id; i < this->readBuffer->count(); i += this->threadCount) {
