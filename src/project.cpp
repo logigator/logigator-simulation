@@ -211,11 +211,11 @@ void start(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 
 	if (args.Length() > 3 && args[3]->IsBoolean() && Nan::To<bool>(args[3]).FromJust())
 	{
-		board->start(ticks, static_cast<uint_fast64_t>(timeout) * static_cast<uint_fast64_t>(10e5), threadCount, true);
+		board->start(ticks, timeout * static_cast<int64_t>(10e5), threadCount, true);
 	}
 	else
 	{
-		board->start(ticks, static_cast<uint_fast64_t>(timeout) * static_cast<uint_fast64_t>(10e5), threadCount);
+		board->start(ticks, timeout * static_cast<int64_t>(10e5), threadCount);
 	}
 }
 

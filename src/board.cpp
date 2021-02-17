@@ -279,7 +279,8 @@ void Board::start(const uint_fast64_t cyclesLeft, const uint_fast64_t timeout, c
 	{
 		if (threads[i] != nullptr)
 		{
-			threads[i]->join();
+			if (threads[i]->joinable())
+				threads[i]->join();
 			delete threads[i];
 		}
 	}

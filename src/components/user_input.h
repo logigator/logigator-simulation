@@ -42,7 +42,7 @@ public:
 		if (inputEvent == InputEvent::Cont)
 		{
 			for (unsigned int i = 0; i < outputCount; i++) {
-				this->outputs[i].setPowered(pendingData[i]);
+				this->outputs[i].setPowered(state[i]);
 			}
 		}
 		else if (inputEvent == InputEvent::Pulse)
