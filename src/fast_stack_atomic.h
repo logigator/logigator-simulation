@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <mutex>
 
 template <class T>
 class FastStackAtomic
@@ -35,11 +36,10 @@ public:
 
 	void push(T item)
 	{
-		const auto temp = _count.fetch_add(1, std::memory_order_relaxed);
+		const auto temp = _count.fetch_add(1);
 		if (temp >= _capacity)
 			_expand();
 		
-
 		_data[temp] = item;
 	}
 
@@ -48,7 +48,7 @@ public:
 		if (_count.load() <= 0)
 			return NULL;
 
-		return _data[_count.fetch_sub(1, std::memory_order_relaxed) - 1];
+		return _data[_count.fetch_sub(1) - 1];
 	}
 
 	void clear()
@@ -74,9 +74,11 @@ private:
 	T* _data = new T[2];
 	std::atomic<size_t> _count = { 0 };
 	size_t _capacity = 2;
+	std::mutex mutex;
 
 	void _expand()
 	{
+		mutex.lock();
 		T* allocation = new T[_capacity * 2];
 		for(size_t i = 0; i < _capacity; i++)
 		{
@@ -85,10 +87,12 @@ private:
 		delete[] _data;
 		_data = allocation;
 		_capacity *= 2;
+		mutex.unlock();
 	}
 
 	void _expand(const size_t size)
 	{
+		mutex.lock();
 		T* allocation = new T[size];
 		for (size_t i = 0; i < _capacity; i++)
 		{
@@ -97,5 +101,6 @@ private:
 		delete[] _data;
 		_data = allocation;
 		_capacity = size;
+		mutex.unlock();
 	}
 };

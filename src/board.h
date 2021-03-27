@@ -27,7 +27,8 @@ public:
 	uint_fast64_t currentSpeed = 0;
 	Events::Event<> tickEvent;
 	void stop();
-	void start(uint_fast64_t cyclesLeft, uint_fast32_t ms, size_t threadCount, bool synchronized = false);
+	void start(uint_fast64_t cyclesLeft, uint_fast64_t timeout, size_t threadCount, bool synchronized = false);
+	void resume();
 	FastStackAtomic<Link*>* readBuffer = new FastStackAtomic<Link*>();
 	FastStackAtomic<Link*>* writeBuffer = new FastStackAtomic<Link*>();
 

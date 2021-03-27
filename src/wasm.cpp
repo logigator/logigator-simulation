@@ -68,7 +68,7 @@ int test() {
 }
 
 int start(double ticks, unsigned long ms) {
-	board->start((unsigned long long)ticks, ms, 1);
+	board->start((unsigned long long)ticks, static_cast<uint_fast64_t>(ms) * static_cast<uint_fast64_t>(10e5), 1);
 	return 0;
 }
 
