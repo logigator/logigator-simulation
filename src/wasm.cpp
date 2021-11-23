@@ -24,6 +24,7 @@
 #include "ram.h"
 #include "dec.h"
 #include "mux.h"
+#include "enc.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -175,8 +176,12 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 			if (inputCount > 0)
 				components[index] = new DEC(board, componentInputs, componentOutputs, inputCount);
 			break;
+        case 19:
+            if (outputCount > 0)
+                components[index] = new ENC(board, componentInputs, componentOutputs, outputCount);
+            break;
         case 20:
-            if (inputCount > 0)
+            if (inputCount > 0 && opCount > 0)
                 components[index] = new MUX(board, componentInputs, componentOutputs, inputCount, ops[0]);
             break;
 		case 204:
