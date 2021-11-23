@@ -149,7 +149,7 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
                     break;
                 case 20:
                     if (v8ComponentInputs->Length() > 0)
-                        components[i] = new MUX(board, componentInputs, componentOutputs, v8ComponentInputs->Length(), Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust());
+                        components[i] = new MUX(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust());
                     break;
                 case 21:
                     if (v8ComponentInputs->Length() > 1)

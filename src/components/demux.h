@@ -9,8 +9,8 @@ class DEMUX :
 	public Component
 {
 public:
-	DEMUX(Board* board, Input* inputs, Output* outputs, const size_t selectBits) : Component(board, inputs, outputs, selectBits + 1, static_cast<size_t>(pow(2, selectBits))) { }
-	DEMUX(Board* board, Link** inputs, Link** outputs, const size_t selectBits) : Component(board, inputs, outputs, selectBits + 1, static_cast<size_t>(pow(2, selectBits))) { }
+	DEMUX(Board* board, Input* inputs, Output* outputs, const size_t inputCount) : Component(board, inputs, outputs, inputCount, static_cast<size_t>(pow(2, inputCount - 1))) { }
+	DEMUX(Board* board, Link** inputs, Link** outputs, const size_t inputCount) : Component(board, inputs, outputs, inputCount, static_cast<size_t>(pow(2, inputCount - 1))) { }
 
 	void compute() override
 	{

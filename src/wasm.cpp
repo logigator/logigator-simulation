@@ -183,7 +183,7 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
             break;
         case 20:
             if (inputCount > 0 && opCount > 0)
-                components[index] = new MUX(board, componentInputs, componentOutputs, inputCount, ops[0]);
+                components[index] = new MUX(board, componentInputs, componentOutputs, ops[0]);
             break;
         case 21:
             if (inputCount > 1)
