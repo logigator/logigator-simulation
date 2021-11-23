@@ -173,6 +173,7 @@ Module.HEAP8.slice(0x00000001 /*address of first byte*/, 0x00000010 /*address of
 | 18 | Decoder | 1 - 32 | 1 - 2^32 | x |
 | 18 | Encoder | 1 - 2^32 | 1 - 32 | x |
 | 20 | Multiplexer | 3 - (31 + 2^32) | 1 | [0] => select address size |
+| 21 | Demultiplexer | 2 - 32 | 2 - 2^32 | x |
 | 200 | User Input | 0 | 1 - 2^32 | x |
 ## License
 This Project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details

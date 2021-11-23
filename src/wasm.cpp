@@ -25,6 +25,7 @@
 #include "dec.h"
 #include "mux.h"
 #include "enc.h"
+#include "demux.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -183,6 +184,10 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
         case 20:
             if (inputCount > 0 && opCount > 0)
                 components[index] = new MUX(board, componentInputs, componentOutputs, inputCount, ops[0]);
+            break;
+        case 21:
+            if (inputCount > 1)
+                components[index] = new DEMUX(board, componentInputs, componentOutputs, inputCount);
             break;
 		case 204:
 			if (opCount > 0)

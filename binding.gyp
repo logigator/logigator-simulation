@@ -26,6 +26,7 @@
 		"src/components/d_ff.h",
 		"src/components/dec.h",
 		"src/components/delay.h",
+		"src/components/demux.h",
 		"src/components/enc.h",
 		"src/components/half_addr.h",
 		"src/components/full_addr.h",
