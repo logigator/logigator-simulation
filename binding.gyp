@@ -31,6 +31,7 @@
 		"src/components/jk_ff.h",
 		"src/components/led_matrix.h",
 		"src/components/not.h",
+		"src/components/mux.h",
 		"src/components/or.h",
 		"src/components/ram.h",
 		"src/components/rng.h",
