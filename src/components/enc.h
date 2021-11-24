@@ -14,15 +14,16 @@ public:
 
 	void compute() override
 	{
+		size_t value = 0;
 		for (size_t i = inputCount - 1; i > 0; i--) {
 			if (inputs[i].getPowered()) {
-				for (size_t j = 0; j < outputCount; j++) {
-					outputs[i].setPowered((i & (1ULL << j)) >> j);
-				}
-				return;
+				value = i;
+				break;
 			}
 		}
-		
+		for (size_t i = 0; i < outputCount; i++) {
+			outputs[i].setPowered((value & (1ULL << i)) >> i);
+		}
 	}
 private:
 };
