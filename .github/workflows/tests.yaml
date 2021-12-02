@@ -1,0 +1,27 @@
+name: 'Tests logigator-simulation'
+on:
+  pull_request:
+  push:
+    branches:
+      - 'master'
+      - 'development'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: 'Setup Node'
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+
+      - name: 'Build'
+        shell: bash
+        working-directory: '.'
+        run: |
+          npm i
+          node test.js tests/*
+
