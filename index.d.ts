@@ -28,13 +28,22 @@ export declare const enum ComponentType {
     XOR = 4,
     DELAY = 5,
     CLK = 6,
+
     HalfAdder = 10,
     FullAdder = 11,
     ROM = 12,
     D_FF = 13,
     JK_FF = 14,
     SR_FF = 15,
-    UserInput = 200
+	RNG = 16,
+	RAM = 17,
+	DECODER = 18,
+	ENCODER = 19,
+	MUX = 20,
+	DEMUX = 21,
+
+    UserInput = 200,
+	LED_Matrix = 204
 }
 
 export declare const enum InputEvent {
