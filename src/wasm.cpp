@@ -23,6 +23,9 @@
 #include "rng.h"
 #include "ram.h"
 #include "dec.h"
+#include "mux.h"
+#include "enc.h"
+#include "demux.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -174,6 +177,18 @@ int initComponent(const unsigned int index, const unsigned int type, const uintp
 			if (inputCount > 0)
 				components[index] = new DEC(board, componentInputs, componentOutputs, inputCount);
 			break;
+        case 19:
+            if (outputCount > 0)
+                components[index] = new ENC(board, componentInputs, componentOutputs, outputCount);
+            break;
+        case 20:
+            if (inputCount > 0 && opCount > 0)
+                components[index] = new MUX(board, componentInputs, componentOutputs, ops[0]);
+            break;
+        case 21:
+            if (inputCount > 1)
+                components[index] = new DEMUX(board, componentInputs, componentOutputs, inputCount);
+            break;
 		case 204:
 			if (opCount > 0)
 				components[index] = new LEDMatrix(board, componentInputs, componentOutputs, ops[0] > 4 ? 8 : 4, outputCount);

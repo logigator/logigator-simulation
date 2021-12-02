@@ -26,6 +26,9 @@
 #include "rng.h"
 #include "ram.h"
 #include "dec.h"
+#include "mux.h"
+#include "enc.h"
+#include "demux.h"
 
 Board* board = new Board();
 Component** components = nullptr;
@@ -140,6 +143,18 @@ void init(const Nan::FunctionCallbackInfo<v8::Value>& args) {
 					if (v8ComponentInputs->Length() > 0)
 						components[i] = new DEC(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
 					break;
+                case 19:
+                    if (v8ComponentOutputs->Length() > 0)
+                        components[i] = new ENC(board, componentInputs, componentOutputs, v8ComponentOutputs->Length());
+                    break;
+                case 20:
+                    if (v8ComponentInputs->Length() > 0)
+                        components[i] = new MUX(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust());
+                    break;
+                case 21:
+                    if (v8ComponentInputs->Length() > 1)
+                        components[i] = new DEMUX(board, componentInputs, componentOutputs, v8ComponentInputs->Length());
+                    break;
 				case 204:
 					if (ops->Length() > 0)
 						components[i] = new LEDMatrix(board, componentInputs, componentOutputs, Nan::To<int32_t>(Nan::Get(ops, 0).ToLocalChecked()).FromJust() > 4 ? 8 : 4, v8ComponentOutputs->Length());
