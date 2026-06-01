@@ -23,8 +23,8 @@ public:
 		for (size_t i = 0; i < inputCount; i++) {
 			index |= static_cast<size_t>(inputs[i].getPowered()) << i;
 		}
-		outputs[index].setPowered(true);
 		outputs[prev].setPowered(false);
+		outputs[index].setPowered(true);
 		prev = index;
 	}
 private:
