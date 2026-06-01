@@ -5,7 +5,7 @@ if [ -f 'webAssembly/dist/logigator-simulation.wasm' ] && [ ! -d 'webAssembly/em
 fi
 
 if [ ! -d 'webAssembly/emscripten' ]; then
-  git clone https://github.com/emscripten-core/emsdk.git webAssembly/emscripten || exit 1
+  git clone --depth 1 --branch 2.0.34 https://github.com/emscripten-core/emsdk.git webAssembly/emscripten || exit 1
   bash webAssembly/emscripten/emsdk install latest
 fi
 
